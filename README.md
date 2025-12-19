@@ -7,17 +7,29 @@
 ### Требования
 - Python 3.x
 - Git
+- Windows PowerShell
 
-### Установка
-1. Клонируйте репозиторий:
+### Первоначальная настройка проекта
+
+1. **Git уже настроен!** Репозиторий инициализирован, базовые файлы созданы.
+
+2. **Настройка GitHub подключения:**
+   - Создайте новый репозиторий на GitHub (https://github.com/new)
+   - Назовите его "GGame"
+   - Запустите скрипт настройки:
+   ```powershell
+   .\setup-github.ps1 -RepoUrl "https://github.com/your-username/GGame.git"
+   ```
+
+3. **Установка зависимостей:**
+```bash
+pip install -r requirements.txt
+```
+
+### Клонирование существующего репозитория
 ```bash
 git clone <repository-url>
 cd GGame
-```
-
-2. Установите зависимости:
-```bash
-pip install -r requirements.txt
 ```
 
 ## Разработка
@@ -29,7 +41,32 @@ python main.py
 
 ### Работа с Git
 
-#### Основные команды:
+#### Быстрый старт с PowerShell скриптом:
+
+Для удобства создан PowerShell скрипт `git-workflow.ps1`. Запускать из папки проекта:
+
+```powershell
+# Проверить статус
+.\git-workflow.ps1 -Action status
+
+# Добавить и зафиксировать изменения
+.\git-workflow.ps1 -Action add
+.\git-workflow.ps1 -Action commit -Message "Описание изменений"
+
+# Отправить/получить изменения
+.\git-workflow.ps1 -Action push
+.\git-workflow.ps1 -Action pull
+
+# Работа с ветками
+.\git-workflow.ps1 -Action branch -Branch "feature/new-feature"
+.\git-workflow.ps1 -Action checkout -Branch "main"
+.\git-workflow.ps1 -Action merge -Branch "feature/new-feature"
+
+# Показать справку
+.\git-workflow.ps1
+```
+
+#### Основные команды Git (альтернативный способ):
 ```bash
 # Проверить статус
 git status

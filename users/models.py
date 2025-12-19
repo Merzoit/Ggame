@@ -61,6 +61,19 @@ class TelegramUser(AbstractUser):
         default=0,
         verbose_name=_("Общий счет")
     )
+
+    # Валюта
+    coins = models.PositiveIntegerField(
+        default=100,
+        verbose_name=_("Монеты"),
+        help_text=_("Обычная валюта для покупок")
+    )
+    gold = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Золото"),
+        help_text=_("Премиум валюта для особых покупок")
+    )
+
     current_streak = models.PositiveIntegerField(
         default=0,
         verbose_name=_("Текущая серия побед")

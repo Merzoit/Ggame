@@ -1,5 +1,31 @@
 from django.contrib import admin
-from .models import CardTemplate, CardInstance
+from .models import AnimeUniverse, Season, CardTemplate, CardInstance
+
+
+@admin.register(AnimeUniverse)
+class AnimeUniverseAdmin(admin.ModelAdmin):
+    """
+    Админка для аниме-вселенных
+    """
+    list_display = ['name', 'is_active', 'season_count']
+    list_filter = ['is_active']
+    search_fields = ['name', 'description']
+    list_editable = ['is_active']
+
+    def season_count(self, obj):
+        return obj.seasons.count()
+    season_count.short_description = "Количество сезонов"
+
+
+@admin.register(Season)
+class SeasonAdmin(admin.ModelAdmin):
+    """
+    Админка для сезонов
+    """
+    list_display = ['name', 'anime_universe', 'season_number', 'is_active']
+    list_filter = ['anime_universe', 'is_active']
+    search_fields = ['name', 'anime_universe__name']
+    list_editable = ['is_active']
 
 
 @admin.register(CardTemplate)
@@ -8,12 +34,12 @@ class CardTemplateAdmin(admin.ModelAdmin):
     Админка для шаблонов карт
     """
     list_display = [
-        'name', 'rarity', 'element', 'anime_universe', 'season',
+        'name', 'element', 'anime_universe', 'season',
         'health_min', 'health_max', 'attack_min', 'attack_max',
-        'coin_cost', 'gold_cost', 'is_active'
+        'coin_cost', 'gold_cost', 'sell_price', 'is_active'
     ]
     list_filter = [
-        'rarity', 'element', 'anime_universe', 'season', 'is_active'
+        'element', 'anime_universe', 'season', 'is_active'
     ]
     search_fields = ['name', 'anime_universe', 'season', 'description']
     list_editable = ['coin_cost', 'gold_cost', 'is_active']
@@ -26,7 +52,7 @@ class CardTemplateAdmin(admin.ModelAdmin):
             'fields': ('anime_universe', 'season')
         }),
         ('Характеристики', {
-            'fields': ('rarity', 'element')
+            'fields': ('element',)
         }),
         ('Диапазоны характеристик', {
             'fields': (
@@ -36,7 +62,7 @@ class CardTemplateAdmin(admin.ModelAdmin):
             )
         }),
         ('Стоимость', {
-            'fields': (('coin_cost', 'gold_cost'),)
+            'fields': (('coin_cost', 'gold_cost'), ('sell_price',))
         }),
         ('Статус', {
             'fields': ('is_active',)
@@ -58,7 +84,7 @@ class CardInstanceAdmin(admin.ModelAdmin):
         'current_health', 'level', 'is_in_deck', 'acquired_at'
     ]
     list_filter = [
-        'template__rarity', 'template__element', 'template__anime_universe',
+        'template__element', 'template__anime_universe',
         'is_in_deck', 'level', 'acquired_at'
     ]
     search_fields = [

@@ -4,18 +4,77 @@ from users.models import TelegramUser
 import random
 
 
+class AnimeUniverse(models.Model):
+    """
+    Аниме-вселенная (франшиза)
+    """
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name=_("Название вселенной")
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name=_("Описание")
+    )
+    logo_url = models.URLField(
+        blank=True,
+        verbose_name=_("URL логотипа")
+    )
+
+    # Статус
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Активна")
+    )
+
+    class Meta:
+        verbose_name = _("Аниме-вселенная")
+        verbose_name_plural = _("Аниме-вселенные")
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Season(models.Model):
+    """
+    Сезон аниме
+    """
+    anime_universe = models.ForeignKey(
+        AnimeUniverse,
+        on_delete=models.CASCADE,
+        related_name='seasons',
+        verbose_name=_("Аниме-вселенная")
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_("Название сезона")
+    )
+    season_number = models.PositiveIntegerField(
+        verbose_name=_("Номер сезона")
+    )
+
+    # Статус
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Активен")
+    )
+
+    class Meta:
+        verbose_name = _("Сезон")
+        verbose_name_plural = _("Сезоны")
+        ordering = ['anime_universe', 'season_number']
+        unique_together = ['anime_universe', 'season_number']
+
+    def __str__(self):
+        return f"{self.anime_universe.name} - {self.name}"
+
+
 class CardTemplate(models.Model):
     """
     Шаблон карты с базовыми характеристиками
     """
-
-    RARITY_CHOICES = [
-        ('common', _('Обычная')),
-        ('rare', _('Редкая')),
-        ('epic', _('Эпическая')),
-        ('legendary', _('Легендарная')),
-        ('mythic', _('Мифическая')),
-    ]
 
     ELEMENT_CHOICES = [
         ('fire', _('Огонь')),
@@ -42,24 +101,18 @@ class CardTemplate(models.Model):
     )
 
     # Принадлежность
-    anime_universe = models.CharField(
-        max_length=100,
-        verbose_name=_("Аниме-вселенная"),
-        help_text=_("Название аниме или франшизы")
+    anime_universe = models.ForeignKey(
+        AnimeUniverse,
+        on_delete=models.CASCADE,
+        verbose_name=_("Аниме-вселенная")
     )
-    season = models.CharField(
-        max_length=50,
-        verbose_name=_("Сезон"),
-        help_text=_("Сезон или арка аниме")
+    season = models.ForeignKey(
+        Season,
+        on_delete=models.CASCADE,
+        verbose_name=_("Сезон")
     )
 
     # Характеристики
-    rarity = models.CharField(
-        max_length=20,
-        choices=RARITY_CHOICES,
-        default='common',
-        verbose_name=_("Редкость")
-    )
     element = models.CharField(
         max_length=20,
         choices=ELEMENT_CHOICES,
@@ -102,6 +155,11 @@ class CardTemplate(models.Model):
         default=0,
         verbose_name=_("Стоимость в золоте")
     )
+    sell_price = models.PositiveIntegerField(
+        default=5,
+        verbose_name=_("Цена продажи"),
+        help_text=_("Цена продажи карты игроку в монетах")
+    )
 
     # Статус
     is_active = models.BooleanField(
@@ -127,7 +185,7 @@ class CardTemplate(models.Model):
         unique_together = ['name', 'anime_universe', 'season']
 
     def __str__(self):
-        return f"{self.name} ({self.get_rarity_display()}) - {self.anime_universe}"
+        return f"{self.name} - {self.anime_universe} ({self.season})"
 
     def get_average_stats(self):
         """Возвращает средние значения характеристик"""

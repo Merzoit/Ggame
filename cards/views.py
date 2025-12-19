@@ -3,8 +3,37 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import CardTemplate, CardInstance
-from .serializers import CardTemplateSerializer, CardInstanceSerializer
+from .models import AnimeUniverse, Season, CardTemplate, CardInstance
+from .serializers import (
+    AnimeUniverseSerializer, SeasonSerializer,
+    CardTemplateSerializer, CardInstanceSerializer
+)
+
+
+class AnimeUniverseViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для просмотра аниме-вселенных
+    """
+    queryset = AnimeUniverse.objects.filter(is_active=True)
+    serializer_class = AnimeUniverseSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet для просмотра сезонов
+    """
+    queryset = Season.objects.filter(is_active=True)
+    serializer_class = SeasonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Фильтр по аниме-вселенной"""
+        queryset = Season.objects.filter(is_active=True)
+        universe_id = self.request.query_params.get('universe', None)
+        if universe_id:
+            queryset = queryset.filter(anime_universe_id=universe_id)
+        return queryset
 
 
 class CardTemplateViewSet(viewsets.ReadOnlyModelViewSet):
@@ -96,6 +125,24 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(card)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def sell_card(self, request, pk=None):
+        """Продать карту"""
+        card = self.get_object()
+        sell_price = card.template.sell_price
+
+        # Начисляем монеты игроку
+        card.owner.coins += sell_price
+        card.owner.save()
+
+        # Удаляем карту
+        card.delete()
+
+        return Response({
+            'message': f'Карта продана за {sell_price} монет',
+            'coins_earned': sell_price
+        })
 
     @action(detail=False, methods=['get'])
     def deck(self, request):

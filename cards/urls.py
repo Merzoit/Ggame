@@ -4,6 +4,8 @@ from . import views
 
 # Создаем роутер для API
 router = DefaultRouter()
+router.register(r'universes', views.AnimeUniverseViewSet)
+router.register(r'seasons', views.SeasonViewSet)
 router.register(r'templates', views.CardTemplateViewSet)
 router.register(r'instances', views.CardInstanceViewSet, basename='cardinstance')
 

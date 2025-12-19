@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>GGame - Карточная битва</title>
+
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+
+    <!-- Иконки и шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+    <!-- Загрузка -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- Главный контейнер -->
+    <div id="app" class="app">
+        <!-- Шапка -->
+        <header class="header">
+            <div class="header-content">
+                <div class="user-info">
+                    <div class="avatar">
+                        <img src="images/default-avatar.png" alt="Аватар" id="user-avatar">
+                        <div class="level-badge" id="user-level">1</div>
+                    </div>
+                    <div class="user-details">
+                        <div class="username" id="username">Игрок</div>
+                        <div class="user-stats">
+                            <span class="stat-item">
+                                <span class="stat-icon">🏆</span>
+                                <span id="user-wins">0</span>
+                            </span>
+                            <span class="stat-item">
+                                <span class="stat-icon">💎</span>
+                                <span id="user-gold">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="settings-btn" id="settings-btn">
+                        <span class="settings-icon">⚙️</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Валюта -->
+        <div class="currency-bar">
+            <div class="currency-item">
+                <span class="currency-icon">🪙</span>
+                <span class="currency-amount" id="coins-amount">100</span>
+            </div>
+            <div class="currency-item">
+                <span class="currency-icon">💰</span>
+                <span class="currency-amount" id="gold-amount">0</span>
+            </div>
+        </div>
+
+        <!-- Навигация -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <button class="nav-item active" data-section="deck">
+                    <div class="nav-icon">🃏</div>
+                    <div class="nav-label">Колоды</div>
+                </button>
+                <button class="nav-item" data-section="inventory">
+                    <div class="nav-icon">🎒</div>
+                    <div class="nav-label">Инвентарь</div>
+                </button>
+                <button class="nav-item" data-section="shop">
+                    <div class="nav-icon">🛒</div>
+                    <div class="nav-label">Магазин</div>
+                </button>
+                <button class="nav-item" data-section="knowledge">
+                    <div class="nav-icon">📚</div>
+                    <div class="nav-label">База знаний</div>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Раздел колоды -->
+            <section id="deck-section" class="content-section active">
+                <div class="section-header">
+                    <h2>Моя колода</h2>
+                    <div class="section-actions">
+                        <button class="action-btn primary" id="edit-deck-btn">
+                            <span class="btn-icon">✏️</span>
+                            Редактировать
+                        </button>
+                    </div>
+                </div>
+
+                <div class="deck-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="deck-health">-</div>
+                        <div class="stat-label">Здоровье</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="deck-attack">-</div>
+                        <div class="stat-label">Атака</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="deck-defense">-</div>
+                        <div class="stat-label">Защита</div>
+                    </div>
+                </div>
+
+                <div class="deck-grid" id="deck-grid">
+                    <!-- Карты колоды будут здесь -->
+                    <div class="empty-slot">
+                        <div class="empty-slot-icon">➕</div>
+                        <div class="empty-slot-text">Добавить карту</div>
+                    </div>
+                    <div class="empty-slot">
+                        <div class="empty-slot-icon">➕</div>
+                        <div class="empty-slot-text">Добавить карту</div>
+                    </div>
+                    <div class="empty-slot">
+                        <div class="empty-slot-icon">➕</div>
+                        <div class="empty-slot-text">Добавить карту</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Раздел инвентаря -->
+            <section id="inventory-section" class="content-section">
+                <div class="section-header">
+                    <h2>Инвентарь</h2>
+                    <div class="section-filters">
+                        <select class="filter-select" id="inventory-filter">
+                            <option value="all">Все предметы</option>
+                            <option value="consumable">Расходуемые</option>
+                            <option value="equipment">Экипировка</option>
+                            <option value="collectible">Коллекционные</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="inventory-grid" id="inventory-grid">
+                    <!-- Предметы будут здесь -->
+                    <div class="empty-state">
+                        <div class="empty-icon">🎒</div>
+                        <div class="empty-title">Инвентарь пуст</div>
+                        <div class="empty-text">Здесь появятся ваши предметы</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Раздел магазина -->
+            <section id="shop-section" class="content-section">
+                <div class="section-header">
+                    <h2>Магазин</h2>
+                    <div class="section-tabs">
+                        <button class="tab-btn active" data-tab="cards">Карты</button>
+                        <button class="tab-btn" data-tab="items">Предметы</button>
+                        <button class="tab-btn" data-tab="currency">Валюта</button>
+                    </div>
+                </div>
+
+                <div class="shop-content">
+                    <div id="cards-tab" class="shop-tab active">
+                        <div class="shop-grid" id="cards-shop-grid">
+                            <!-- Карты для продажи -->
+                        </div>
+                    </div>
+
+                    <div id="items-tab" class="shop-tab">
+                        <div class="shop-grid" id="items-shop-grid">
+                            <!-- Предметы для продажи -->
+                        </div>
+                    </div>
+
+                    <div id="currency-tab" class="shop-tab">
+                        <div class="currency-shop">
+                            <div class="currency-package">
+                                <div class="package-icon">💰</div>
+                                <div class="package-info">
+                                    <div class="package-name">Золотой пакет</div>
+                                    <div class="package-price">99 ₽</div>
+                                    <div class="package-reward">+500 золота</div>
+                                </div>
+                                <button class="buy-btn">Купить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Раздел базы знаний -->
+            <section id="knowledge-section" class="content-section">
+                <div class="section-header">
+                    <h2>База знаний</h2>
+                    <div class="section-search">
+                        <input type="text" class="search-input" placeholder="Поиск по базе знаний..." id="knowledge-search">
+                    </div>
+                </div>
+
+                <div class="knowledge-content">
+                    <div class="knowledge-categories">
+                        <div class="category-card" data-category="rules">
+                            <div class="category-icon">📋</div>
+                            <div class="category-title">Правила игры</div>
+                            <div class="category-description">Основные правила и механики</div>
+                        </div>
+
+                        <div class="category-card" data-category="cards">
+                            <div class="category-icon">🃏</div>
+                            <div class="category-title">Карточки</div>
+                            <div class="category-description">Информация о картах и их свойствах</div>
+                        </div>
+
+                        <div class="category-card" data-category="strategies">
+                            <div class="category-icon">🎯</div>
+                            <div class="category-title">Стратегии</div>
+                            <div class="category-description">Советы по игре и тактикам</div>
+                        </div>
+
+                        <div class="category-card" data-category="universe">
+                            <div class="category-icon">🌟</div>
+                            <div class="category-title">Вселенные</div>
+                            <div class="category-description">Истории и лор аниме-вселенных</div>
+                        </div>
+                    </div>
+
+                    <div class="knowledge-article" id="knowledge-article">
+                        <div class="article-placeholder">
+                            <div class="placeholder-icon">📖</div>
+                            <div class="placeholder-text">Выберите категорию для просмотра информации</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Модальные окна -->
+        <div id="modals-container"></div>
+
+        <!-- Нижняя навигация (для больших экранов скрыта) -->
+        <nav class="bottom-nav">
+            <button class="bottom-nav-item active" data-section="deck">
+                <div class="nav-icon">🃏</div>
+                <div class="nav-label">Колоды</div>
+            </button>
+            <button class="bottom-nav-item" data-section="inventory">
+                <div class="nav-icon">🎒</div>
+                <div class="nav-label">Инвентарь</div>
+            </button>
+            <button class="bottom-nav-item" data-section="shop">
+                <div class="nav-icon">🛒</div>
+                <div class="nav-label">Магазин</div>
+            </button>
+            <button class="bottom-nav-item" data-section="knowledge">
+                <div class="nav-icon">📚</div>
+                <div class="nav-label">Знания</div>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

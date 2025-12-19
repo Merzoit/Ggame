@@ -151,10 +151,10 @@ class DeckAdmin(admin.ModelAdmin):
     Админка для колод
     """
     list_display = [
-        'name', 'owner', 'is_active', 'cards_count',
+        'name', 'owner', 'cards_count',
         'total_health', 'total_attack', 'total_defense', 'created_at'
     ]
-    list_filter = ['is_active', 'created_at']
+    list_filter = ['created_at']
     search_fields = [
         'name', 'owner__username_telegram',
         'owner__first_name_telegram'
@@ -164,7 +164,7 @@ class DeckAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('owner', 'name', 'description', 'is_active')
+            'fields': ('owner', 'name', 'description')
         }),
         ('Информация', {
             'fields': ('created_at', 'updated_at'),
@@ -197,7 +197,7 @@ class DeckCardAdmin(admin.ModelAdmin):
     Админка для карт в колодах
     """
     list_display = ['deck', 'card', 'position']
-    list_filter = ['deck__is_active', 'position']
+    list_filter = ['position']
     search_fields = [
         'deck__name', 'card__template__name',
         'deck__owner__username_telegram'

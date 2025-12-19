@@ -198,26 +198,22 @@ class CardTemplate(models.Model):
 
 class Deck(models.Model):
     """
-    Боевая колода игрока
+    Боевая колода игрока (одна на игрока)
     """
-    owner = models.ForeignKey(
+    owner = models.OneToOneField(
         TelegramUser,
         on_delete=models.CASCADE,
-        related_name='decks',
+        related_name='deck',
         verbose_name=_("Владелец")
     )
     name = models.CharField(
         max_length=50,
+        default="Моя колода",
         verbose_name=_("Название колоды")
     )
     description = models.TextField(
         blank=True,
         verbose_name=_("Описание")
-    )
-    is_active = models.BooleanField(
-        default=False,
-        verbose_name=_("Активная колода"),
-        help_text=_("Используется ли эта колода в текущих боях")
     )
 
     # Мета
@@ -233,7 +229,6 @@ class Deck(models.Model):
     class Meta:
         verbose_name = _("Колоды")
         verbose_name_plural = _("Колоды")
-        unique_together = ['owner', 'name']  # Уникальные имена колод у игрока
 
     def __str__(self):
         return f"{self.owner.username_telegram or self.owner.telegram_id}: {self.name}"

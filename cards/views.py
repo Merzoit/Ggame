@@ -146,25 +146,39 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
         })
 
 
-class DeckViewSet(viewsets.ModelViewSet):
+class DeckViewSet(viewsets.ViewSet):
     """
-    ViewSet для управления колодами игрока
+    ViewSet для управления колодой игрока (одна на игрока)
     """
-    serializer_class = DeckSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        """Возвращает только колоды текущего пользователя"""
-        return Deck.objects.filter(owner=self.request.user)
+    def get_deck(self):
+        """Получить или создать колоду для пользователя"""
+        deck, created = Deck.objects.get_or_create(
+            owner=self.request.user,
+            defaults={'name': 'Моя колода'}
+        )
+        return deck
 
-    def perform_create(self, serializer):
-        """Создание колоды для текущего пользователя"""
-        serializer.save(owner=self.request.user)
+    def retrieve(self, request):
+        """Получить колоду пользователя"""
+        deck = self.get_deck()
+        serializer = DeckSerializer(deck)
+        return Response(serializer.data)
 
-    @action(detail=True, methods=['post'])
-    def add_card(self, request, pk=None):
+    def update(self, request):
+        """Обновить колоду пользователя"""
+        deck = self.get_deck()
+        serializer = DeckSerializer(deck, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def add_card(self, request):
         """Добавить карту в колоду"""
-        deck = self.get_object()
+        deck = self.get_deck()
         card_id = request.data.get('card_id')
         position = request.data.get('position')
 
@@ -180,13 +194,6 @@ class DeckViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'Карта не найдена в вашем инвентаре'},
                 status=status.HTTP_404_NOT_FOUND
-            )
-
-        # Проверяем, что карта не используется в другой колоде
-        if DeckCard.objects.filter(card=card).exclude(deck=deck).exists():
-            return Response(
-                {'error': 'Эта карта уже используется в другой колоде'},
-                status=status.HTTP_400_BAD_REQUEST
             )
 
         # Проверяем позицию
@@ -219,13 +226,13 @@ class DeckViewSet(viewsets.ModelViewSet):
             deck_card.card = card
             deck_card.save()
 
-        serializer = self.get_serializer(deck)
+        serializer = DeckSerializer(deck)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'])
-    def remove_card(self, request, pk=None):
+    @action(detail=False, methods=['post'])
+    def remove_card(self, request):
         """Убрать карту из колоды"""
-        deck = self.get_object()
+        deck = self.get_deck()
         position = request.data.get('position')
 
         if not position:
@@ -238,48 +245,12 @@ class DeckViewSet(viewsets.ModelViewSet):
             deck_card = DeckCard.objects.get(deck=deck, position=position)
             deck_card.delete()
 
-            serializer = self.get_serializer(deck)
+            serializer = DeckSerializer(deck)
             return Response(serializer.data)
 
         except DeckCard.DoesNotExist:
             return Response(
                 {'error': 'Карта в указанной позиции не найдена'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
-    @action(detail=True, methods=['post'])
-    def set_active(self, request, pk=None):
-        """Сделать колоду активной"""
-        deck = self.get_object()
-
-        # Проверяем валидность колоды
-        is_valid, message = deck.is_valid()
-        if not is_valid:
-            return Response(
-                {'error': message},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Деактивируем все другие колоды пользователя
-        Deck.objects.filter(owner=request.user).update(is_active=False)
-
-        # Активируем эту колоду
-        deck.is_active = True
-        deck.save()
-
-        serializer = self.get_serializer(deck)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def active_deck(self, request):
-        """Получить активную колоду"""
-        try:
-            deck = Deck.objects.get(owner=request.user, is_active=True)
-            serializer = self.get_serializer(deck)
-            return Response(serializer.data)
-        except Deck.DoesNotExist:
-            return Response(
-                {'error': 'Активная колода не найдена'},
                 status=status.HTTP_404_NOT_FOUND
             )
 

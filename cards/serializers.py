@@ -88,7 +88,7 @@ class DeckSerializer(serializers.ModelSerializer):
         model = Deck
         fields = [
             'id', 'owner', 'owner_username', 'name', 'description',
-            'is_active', 'cards_count', 'total_stats', 'is_valid_deck',
+            'cards_count', 'total_stats', 'is_valid_deck',
             'cards', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'owner', 'created_at', 'updated_at']

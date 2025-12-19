@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/', include('game.urls')),
     path('api/users/', include('users.urls')),
     path('api/inventory/', include('inventory.urls')),
+    path('api/cards/', include('cards.urls')),
     path('api/telegram/', include('telegram_bot.urls')),
 ]
 

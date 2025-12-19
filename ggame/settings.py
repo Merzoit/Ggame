@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'telegram_bot',
     'inventory',
+    'cards',
 
     # Third-party apps
     'rest_framework',

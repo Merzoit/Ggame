@@ -2,14 +2,14 @@
   <header class="app-header">
     <div class="header-content">
       <div class="user-section">
-        <div class="avatar-wrapper">
+        <router-link to="/profile" class="avatar-wrapper">
           <img 
             :src="userAvatar" 
             alt="Avatar" 
             class="avatar"
           />
           <div class="level-badge">{{ userLevel }}</div>
-        </div>
+        </router-link>
         <div class="user-info">
           <div class="username">{{ userName }}</div>
           <div class="user-stats">
@@ -21,12 +21,12 @@
         </div>
       </div>
       
-      <button class="settings-btn" @click="showSettings">
+      <router-link to="/profile" class="settings-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
         </svg>
-      </button>
+      </router-link>
     </div>
     
     <!-- Валютная панель -->
@@ -49,10 +49,29 @@ import { useGameStore } from '../../stores/game'
 
 const gameStore = useGameStore()
 
-const userName = computed(() => gameStore.user?.username || 'Игрок')
-const userAvatar = computed(() => gameStore.user?.avatar || '/default-avatar.png')
-const userLevel = computed(() => Math.floor((gameStore.user?.games_won || 0) / 10) + 1)
-const userWins = computed(() => gameStore.user?.games_won || 0)
+const userName = computed(() => {
+  const user = gameStore.user || gameStore.deck?.owner
+  return user?.username_telegram || 
+         user?.first_name_telegram || 
+         user?.username ||
+         'Игрок'
+})
+
+const userAvatar = computed(() => {
+  const user = gameStore.user || gameStore.deck?.owner
+  return user?.avatar || '/default-avatar.png'
+})
+
+const userLevel = computed(() => {
+  const user = gameStore.user || gameStore.deck?.owner
+  const wins = user?.games_won || 0
+  return Math.floor(wins / 10) + 1
+})
+
+const userWins = computed(() => {
+  const user = gameStore.user || gameStore.deck?.owner
+  return user?.games_won || 0
+})
 
 function showSettings() {
   // TODO: Показать настройки
@@ -89,6 +108,9 @@ function showSettings() {
   position: relative;
   width: 50px;
   height: 50px;
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .avatar {
@@ -157,6 +179,7 @@ function showSettings() {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 }
 
 .settings-btn:hover {

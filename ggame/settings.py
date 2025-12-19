@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'game',
     'users',
     'telegram_bot',
+    'inventory',
 
     # Third-party apps
     'rest_framework',

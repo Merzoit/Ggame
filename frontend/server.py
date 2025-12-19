@@ -31,10 +31,10 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 def run_server():
     """Запуск сервера"""
     with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
-        print("🚀 GGame Frontend Server запущен!")
-        print(f"📱 Откройте в браузере: http://localhost:{PORT}")
-        print(f"📁 Папка: {DIRECTORY}")
-        print("❌ Для остановки нажмите Ctrl+C")
+        print("GGame Frontend Server запущен!")
+        print(f"Откройте в браузере: http://localhost:{PORT}")
+        print(f"Папка: {DIRECTORY}")
+        print("Для остановки нажмите Ctrl+C")
 
         # Автоматически открыть в браузере
         try:

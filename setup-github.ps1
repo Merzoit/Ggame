@@ -47,11 +47,11 @@ if ($sshKeyExists) {
 
     # Пробуем подключиться к GitHub
     Write-Host "Проверяю подключение к GitHub..."
-    $sshTest = ssh -T git@github.com 2>&1
-    if ($sshTest -like "*successfully authenticated*") {
+    $sshTest = & ssh -T git@github.com 2>&1
+    if ($sshTest -match "successfully authenticated") {
         Write-Host "✓ SSH подключение работает!"
         # Отправляем код на GitHub
-        git push -u origin master
+        & git push -u origin master
         Write-Host "✓ Код отправлен на GitHub!"
     } else {
         Write-Host "✗ SSH подключение не работает. Проверьте ключ в GitHub."

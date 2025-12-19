@@ -11,11 +11,16 @@ python-telegram-bot==21.6
 
 # База данных
 psycopg2-binary==2.9.10  # для PostgreSQL
-sqlite3  # встроен в Python (для разработки)
 
 # Дополнительные утилиты
 python-dotenv==1.0.1  # для переменных окружения
 requests==2.32.3
 
-# Для разработки
-django-debug-toolbar==4.4.6
+# Для продакшена
+gunicorn==21.2.0  # WSGI сервер
+whitenoise==6.6.0  # Статические файлы
+django-cors-headers==4.3.1  # CORS для фронтенда
+dj-database-url==2.1.0  # Поддержка DATABASE_URL
+
+# Для разработки (опционально)
+# django-debug-toolbar==4.4.6

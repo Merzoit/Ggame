@@ -20,7 +20,8 @@ const navItems = ref([
   { path: '/', icon: '🃏', label: 'Колоды' },
   { path: '/inventory', icon: '🎒', label: 'Инвентарь' },
   { path: '/shop', icon: '🛒', label: 'Магазин' },
-  { path: '/knowledge', icon: '📚', label: 'Знания' }
+  { path: '/knowledge', icon: '📚', label: 'Знания' },
+  { path: '/profile', icon: '👤', label: 'Профиль' }
 ])
 </script>
 
@@ -34,9 +35,10 @@ const navItems = ref([
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-color);
   display: flex;
-  padding: 8px;
+  padding: 6px 4px;
   z-index: 100;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+  gap: 4px;
 }
 
 .nav-item {
@@ -45,13 +47,14 @@ const navItems = ref([
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px;
+  gap: 3px;
+  padding: 6px 4px;
   border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--text-secondary);
   transition: var(--transition);
   position: relative;
+  min-width: 0;
 }
 
 .nav-item:hover {
@@ -78,12 +81,12 @@ const navItems = ref([
 }
 
 .nav-icon {
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1;
 }
 
 .nav-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   text-align: center;
 }

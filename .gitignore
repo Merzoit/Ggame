@@ -171,3 +171,49 @@ config.json
 # Build directories
 build/
 dist/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+django_session
+staticfiles/
+media/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite3
+
+# Secrets
+secrets.json
+config.json
+
+# Cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+ENV/

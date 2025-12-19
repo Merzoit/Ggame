@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AnimeUniverse, Season, CardTemplate, CardInstance
+from .models import AnimeUniverse, Season, CardTemplate, CardInstance, Deck, DeckCard
 
 
 class AnimeUniverseSerializer(serializers.ModelSerializer):
@@ -71,3 +71,60 @@ class CardInstanceSerializer(serializers.ModelSerializer):
 
     def get_is_alive(self, obj):
         return obj.is_alive()
+
+
+class DeckSerializer(serializers.ModelSerializer):
+    """Сериализатор для колод"""
+    owner_username = serializers.CharField(
+        source='owner.username_telegram',
+        read_only=True
+    )
+    cards_count = serializers.SerializerMethodField()
+    total_stats = serializers.SerializerMethodField()
+    is_valid_deck = serializers.SerializerMethodField()
+    cards = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Deck
+        fields = [
+            'id', 'owner', 'owner_username', 'name', 'description',
+            'is_active', 'cards_count', 'total_stats', 'is_valid_deck',
+            'cards', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'owner', 'created_at', 'updated_at']
+
+    def get_cards_count(self, obj):
+        return obj.deck_cards.count()
+
+    def get_total_stats(self, obj):
+        return obj.get_total_stats()
+
+    def get_is_valid_deck(self, obj):
+        valid, message = obj.is_valid()
+        return {'valid': valid, 'message': message}
+
+    def get_cards(self, obj):
+        deck_cards = obj.deck_cards.select_related('card__template').all()
+        return DeckCardSerializer(deck_cards, many=True).data
+
+
+class DeckCardSerializer(serializers.ModelSerializer):
+    """Сериализатор для карт в колоде"""
+    card_info = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DeckCard
+        fields = ['id', 'deck', 'card', 'position', 'card_info']
+        read_only_fields = ['id']
+
+    def get_card_info(self, obj):
+        return {
+            'id': obj.card.id,
+            'template_name': obj.card.template.name,
+            'health': obj.card.health,
+            'attack': obj.card.attack,
+            'defense': obj.card.defense,
+            'element': obj.card.template.element,
+            'anime_universe': obj.card.template.anime_universe.name,
+            'season': obj.card.template.season.name
+        }

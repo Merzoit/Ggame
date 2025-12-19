@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AnimeUniverse, Season, CardTemplate, CardInstance
+from .models import AnimeUniverse, Season, CardTemplate, CardInstance, Deck, DeckCard
 
 
 @admin.register(AnimeUniverse)
@@ -131,3 +131,75 @@ class CardInstanceAdmin(admin.ModelAdmin):
             f'Характеристики перегенерированы для {queryset.count()} карт.'
         )
     regenerate_stats.short_description = "Перегенерировать характеристики"
+
+
+class DeckCardInline(admin.TabularInline):
+    """
+    Inline для карт в колоде
+    """
+    model = DeckCard
+    extra = 0
+    max_num = 3
+    min_num = 0
+    fields = ['card', 'position']
+    raw_id_fields = ['card']
+
+
+@admin.register(Deck)
+class DeckAdmin(admin.ModelAdmin):
+    """
+    Админка для колод
+    """
+    list_display = [
+        'name', 'owner', 'is_active', 'cards_count',
+        'total_health', 'total_attack', 'total_defense', 'created_at'
+    ]
+    list_filter = ['is_active', 'created_at']
+    search_fields = [
+        'name', 'owner__username_telegram',
+        'owner__first_name_telegram'
+    ]
+    inlines = [DeckCardInline]
+    raw_id_fields = ['owner']
+
+    fieldsets = (
+        (None, {
+            'fields': ('owner', 'name', 'description', 'is_active')
+        }),
+        ('Информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ['created_at', 'updated_at']
+
+    def cards_count(self, obj):
+        return obj.deck_cards.count()
+    cards_count.short_description = "Карт в колоде"
+
+    def total_health(self, obj):
+        return obj.get_total_stats()['health']
+    total_health.short_description = "Здоровье"
+
+    def total_attack(self, obj):
+        return obj.get_total_stats()['attack']
+    total_attack.short_description = "Атака"
+
+    def total_defense(self, obj):
+        return obj.get_total_stats()['defense']
+    total_defense.short_description = "Защита"
+
+
+@admin.register(DeckCard)
+class DeckCardAdmin(admin.ModelAdmin):
+    """
+    Админка для карт в колодах
+    """
+    list_display = ['deck', 'card', 'position']
+    list_filter = ['deck__is_active', 'position']
+    search_fields = [
+        'deck__name', 'card__template__name',
+        'deck__owner__username_telegram'
+    ]
+    raw_id_fields = ['deck', 'card']

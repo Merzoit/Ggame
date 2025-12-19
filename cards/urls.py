@@ -8,6 +8,7 @@ router.register(r'universes', views.AnimeUniverseViewSet)
 router.register(r'seasons', views.SeasonViewSet)
 router.register(r'templates', views.CardTemplateViewSet)
 router.register(r'instances', views.CardInstanceViewSet, basename='cardinstance')
+router.register(r'decks', views.DeckViewSet, basename='deck')
 
 urlpatterns = [
     path('', include(router.urls)),

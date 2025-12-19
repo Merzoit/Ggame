@@ -196,6 +196,121 @@ class CardTemplate(models.Model):
         }
 
 
+class Deck(models.Model):
+    """
+    Боевая колода игрока
+    """
+    owner = models.ForeignKey(
+        TelegramUser,
+        on_delete=models.CASCADE,
+        related_name='decks',
+        verbose_name=_("Владелец")
+    )
+    name = models.CharField(
+        max_length=50,
+        verbose_name=_("Название колоды")
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name=_("Описание")
+    )
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name=_("Активная колода"),
+        help_text=_("Используется ли эта колода в текущих боях")
+    )
+
+    # Мета
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Создана")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Обновлена")
+    )
+
+    class Meta:
+        verbose_name = _("Колоды")
+        verbose_name_plural = _("Колоды")
+        unique_together = ['owner', 'name']  # Уникальные имена колод у игрока
+
+    def __str__(self):
+        return f"{self.owner.username_telegram or self.owner.telegram_id}: {self.name}"
+
+    def clean(self):
+        """Валидация колоды"""
+        from django.core.exceptions import ValidationError
+        super().clean()
+        cards_count = self.deck_cards.count()
+
+        if cards_count > 3:
+            raise ValidationError(_("В колоде не может быть больше 3 карт"))
+
+        # Проверка уникальности шаблонов
+        templates = [deck_card.card.template for deck_card in self.deck_cards.all()]
+        if len(templates) != len(set(templates)):
+            raise ValidationError(_("В колоде не может быть карт с одинаковыми шаблонами"))
+
+    def is_valid(self):
+        """Проверка валидности колоды"""
+        cards_count = self.deck_cards.count()
+        if cards_count != 3:
+            return False, f"В колоде должно быть ровно 3 карты (сейчас {cards_count})"
+
+        # Проверка уникальности шаблонов
+        templates = [deck_card.card.template for deck_card in self.deck_cards.all()]
+        if len(templates) != len(set(templates)):
+            return False, "В колоде не может быть карт с одинаковыми шаблонами"
+
+        return True, "Колоды валидна"
+
+    def get_total_stats(self):
+        """Получить суммарные характеристики всех карт в колоде"""
+        if not self.deck_cards.exists():
+            return {'health': 0, 'attack': 0, 'defense': 0}
+
+        total_health = sum(deck_card.card.health for deck_card in self.deck_cards.all())
+        total_attack = sum(deck_card.card.attack for deck_card in self.deck_cards.all())
+        total_defense = sum(deck_card.card.defense for deck_card in self.deck_cards.all())
+
+        return {
+            'health': total_health,
+            'attack': total_attack,
+            'defense': total_defense
+        }
+
+
+class DeckCard(models.Model):
+    """
+    Карта в колоде (связь колоды с картой игрока)
+    """
+    deck = models.ForeignKey(
+        Deck,
+        on_delete=models.CASCADE,
+        related_name='deck_cards',
+        verbose_name=_("Колоды")
+    )
+    card = models.ForeignKey(
+        'CardInstance',
+        on_delete=models.CASCADE,
+        verbose_name=_("Карта")
+    )
+    position = models.PositiveIntegerField(
+        verbose_name=_("Позиция в колоде"),
+        help_text=_("Порядок карты в колоде (1-3)")
+    )
+
+    class Meta:
+        verbose_name = _("Карта в колоде")
+        verbose_name_plural = _("Карты в колодах")
+        unique_together = ['deck', 'card']  # Одна карта только в одной колоде
+        ordering = ['position']
+
+    def __str__(self):
+        return f"{self.deck.name} - {self.card.template.name} (pos {self.position})"
+
+
 class CardInstance(models.Model):
     """
     Конкретный экземпляр карты у игрока со случайными характеристиками

@@ -107,7 +107,9 @@ export default {
   },
 
   getUserProfile() {
-    return api.get('/cards/card-instances/get_user_profile/')
+    const telegramId = localStorage.getItem('telegram_user_id')
+    const params = telegramId ? { telegram_id: telegramId } : {}
+    return api.get('/cards/card-instances/get_user_profile/', { params })
   },
 
   getUserByTelegramId(telegramId) {

@@ -65,7 +65,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Разрешить доступ без аутентификации для запросов с telegram_id"""
-        if self.request.query_params.get('telegram_id'):
+        if self.request.query_params.get('telegram_id') or self.action == 'get_user_profile':
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -162,6 +162,57 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
         return Response({
             'message': f'Карта продана за {sell_price} монет',
             'coins_earned': sell_price
+        })
+
+    @action(detail=False, methods=['get'])
+    def get_user_profile(self, request):
+        """Получить профиль пользователя с его картами и колодой"""
+        telegram_id = request.query_params.get('telegram_id')
+
+        if telegram_id:
+            # Получаем пользователя по telegram_id
+            try:
+                from users.models import TelegramUser
+                user = TelegramUser.objects.get(telegram_id=telegram_id)
+            except TelegramUser.DoesNotExist:
+                return Response(
+                    {'error': 'Пользователь не найден'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        elif request.user.is_authenticated:
+            user = request.user
+        else:
+            return Response(
+                {'error': 'Необходима аутентификация'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Получаем карты пользователя
+        cards = CardInstance.objects.filter(owner=user)
+
+        # Получить или создать колоду
+        deck, created = Deck.objects.get_or_create(owner=user)
+
+        return Response({
+            'user': {
+                'id': user.id,
+                'telegram_id': user.telegram_id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'total_games': user.total_games,
+                'games_won': user.games_won,
+                'total_points': user.total_points,
+                'current_streak': user.current_streak,
+                'best_streak': user.best_streak,
+                'coins': user.coins,
+                'gems': user.gems,
+                'date_joined_telegram': user.date_joined_telegram.isoformat() if user.date_joined_telegram else None,
+                'last_activity': user.last_activity.isoformat() if user.last_activity else None,
+                'win_rate': user.win_rate,
+            },
+            'cards': CardInstanceSerializer(cards, many=True).data,
+            'deck': DeckSerializer(deck).data,
         })
 
 

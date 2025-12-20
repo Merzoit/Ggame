@@ -32,16 +32,24 @@ export const useGameStore = defineStore('game', () => {
 
   async function fetchUserProfile() {
     try {
+      console.log('🔄 Starting fetchUserProfile...')
       loading.value = true
+
+      console.log('📡 Calling API getUserProfile...')
       const profileData = await api.getUserProfile()
+      console.log('✅ API response:', profileData)
+
       user.value = profileData.user
       deck.value = profileData.deck
       inventory.value = profileData.cards
+
+      console.log('✅ User profile loaded:', { user: user.value, deck: deck.value })
     } catch (err) {
+      console.error('❌ Failed to fetch user profile:', err)
       error.value = err.message
-      console.error('Failed to fetch user profile:', err)
     } finally {
       loading.value = false
+      console.log('🏁 fetchUserProfile completed')
     }
   }
 

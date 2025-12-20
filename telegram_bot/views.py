@@ -84,10 +84,13 @@ def telegram_webhook(request):
     try:
         # Получаем данные от Telegram
         data = json.loads(request.body.decode('utf-8'))
-        logger.info(f"Получены данные от Telegram: {data}")
+        logger.info(f"=== WEBHOOK RECEIVED ===")
+        logger.info(f"Data: {data}")
+        logger.info(f"Headers: {dict(request.headers)}")
 
         # Проверяем наличие сообщения
         if 'message' not in data:
+            logger.info("No message in webhook data")
             return JsonResponse({'status': 'ok'})
 
         message = data['message']
@@ -95,17 +98,25 @@ def telegram_webhook(request):
         text = message.get('text', '')
         from_user = message.get('from', {})
 
+        logger.info(f"Message from {from_user.get('username', 'unknown')}: {text}")
+
         # Обрабатываем команду /start
         if text == '/start':
+            logger.info("Processing /start command")
             # Регистрируем пользователя
             user, created = register_or_get_user(from_user)
 
             if user:
+                logger.info(f"User registered/updated: {user.username_telegram}")
+
                 # Создаем кнопку для открытия веб-приложения
                 # URL фронтенда берем из настроек
                 from django.conf import settings
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ggame.vercel.app')
                 web_app_url = f"{frontend_url}/#/profile"
+
+                logger.info(f"Frontend URL: {frontend_url}")
+                logger.info(f"Web app URL: {web_app_url}")
 
                 reply_markup = {
                     'inline_keyboard': [[{
@@ -124,10 +135,16 @@ def telegram_webhook(request):
 
 Нажмите кнопку ниже, чтобы начать игру!"""
 
-                send_message(chat_id, welcome_text, reply_markup)
+                logger.info(f"Sending welcome message to chat {chat_id}")
+                result = send_message(chat_id, welcome_text, reply_markup)
+                logger.info(f"Send result: {result}")
 
             else:
+                logger.error("Failed to register user")
                 send_message(chat_id, "❌ Ошибка регистрации. Попробуйте позже.")
+
+        else:
+            logger.info(f"Ignoring message: {text}")
 
         return JsonResponse({'status': 'ok'})
 

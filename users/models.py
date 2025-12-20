@@ -116,11 +116,16 @@ class TelegramUser(AbstractUser):
     def __str__(self):
         return f"{self.username_telegram or self.telegram_id} ({self.total_points} pts)"
 
-    def get_win_rate(self):
+    @property
+    def win_rate(self):
         """Возвращает процент побед"""
         if self.total_games == 0:
             return 0
         return round((self.games_won / self.total_games) * 100, 1)
+
+    def get_win_rate(self):
+        """Возвращает процент побед (для совместимости)"""
+        return self.win_rate
 
     def update_stats(self, won=False, points=0):
         """Обновляет статистику после игры"""

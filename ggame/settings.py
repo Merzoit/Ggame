@@ -62,8 +62,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Статические файлы
-    'corsheaders.middleware.CorsMiddleware',  # CORS
+    # 'corsheaders.middleware.CorsMiddleware',  # CORS - временно отключен для диагностики
     'ggame.middleware.AdminCsrfExemptMiddleware',  # Отключает CSRF для админки
+    'ggame.middleware.RequestLoggingMiddleware',  # Логирование всех запросов
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -250,7 +251,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20
+    'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        # Убедимся что HTML renderer отключен для API
+    ]
 }
 
 # Настройки для админки

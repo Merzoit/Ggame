@@ -1,20 +1,42 @@
-"""
-Middleware для обхода CSRF в админке Railway
-"""
-from django.utils.deprecation import MiddlewareMixin
+import logging
 
+logger = logging.getLogger(__name__)
 
-class AdminCsrfExemptMiddleware(MiddlewareMixin):
-    """
-    Отключает CSRF проверку для админки
-    """
+class AdminCsrfExemptMiddleware:
+    """Отключает CSRF для админки"""
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_view(self, request, callback, callback_args, callback_kwargs):
-        """
-        Отключает CSRF для URL начинающихся с /admin/
-        """
+    def __call__(self, request):
         if request.path.startswith('/admin/'):
-            # Отключаем CSRF проверку
             setattr(request, '_dont_enforce_csrf_checks', True)
+        return self.get_response(request)
 
-        return None
+
+class RequestLoggingMiddleware:
+    """Middleware для логирования всех входящих запросов"""
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Логируем входящий запрос
+        print(f"=== REQUEST: {request.method} {request.path} ===")
+        print(f"Headers: {dict(request.headers)}")
+        print(f"Query params: {request.GET}")
+        print(f"User agent: {request.META.get('HTTP_USER_AGENT', 'Unknown')}")
+
+        if request.method == 'OPTIONS':
+            print("CORS preflight request detected")
+
+        try:
+            response = self.get_response(request)
+
+            # Логируем ответ
+            print(f"=== RESPONSE: {response.status_code} ===")
+            print(f"Response headers: {dict(response.headers)}")
+
+            return response
+
+        except Exception as e:
+            print(f"=== EXCEPTION in middleware: {str(e)} ===")
+            raise

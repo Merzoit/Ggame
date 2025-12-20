@@ -63,9 +63,9 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Статические файлы
     # 'corsheaders.middleware.CorsMiddleware',  # CORS - временно отключен для диагностики
+    'ggame.middleware.CORSMiddleware',  # Добавляет CORS headers ПЕРВЫМ
     'ggame.middleware.AdminCsrfExemptMiddleware',  # Отключает CSRF для админки
     'ggame.middleware.RequestLoggingMiddleware',  # Логирование всех запросов
-    'ggame.middleware.CORSMiddleware',  # Добавляет CORS headers
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

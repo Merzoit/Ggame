@@ -51,17 +51,24 @@ class RequestLoggingMiddleware:
 
 
 class CORSMiddleware:
-    """Добавляет CORS headers ко всем ответам"""
+    """Добавляет CORS headers ко всем ответам, даже при ошибках"""
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        response = self.get_response(request)
+        try:
+            response = self.get_response(request)
+        except Exception as e:
+            # Если произошла ошибка, создаем базовый error response
+            from django.http import HttpResponseServerError
+            response = HttpResponseServerError("Internal Server Error")
+            print(f"=== CORS MIDDLEWARE: Exception caught: {e} ===")
 
-        # Добавляем CORS headers для всех запросов
+        # Добавляем CORS headers для всех запросов, даже при ошибках
         response['Access-Control-Allow-Origin'] = '*'
         response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
         response['Access-Control-Max-Age'] = '86400'
+        print(f"=== CORS MIDDLEWARE: Added headers to response {response.status_code} ===")
 
         return response

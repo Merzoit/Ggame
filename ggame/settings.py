@@ -183,11 +183,19 @@ TELEGRAM_WEBHOOK_URL = os.getenv('TELEGRAM_WEBHOOK_URL', 'http://localhost:8000'
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 
 # CORS настройки
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if os.getenv('CORS_ALLOWED_ORIGINS') else [
+CORS_ALLOWED_ORIGINS = [
+    'https://ggame-psi.vercel.app',
     'http://localhost:5173',
     'http://localhost:3000',
     'http://127.0.0.1:5173',
 ]
+
+# Разрешаем CORS из переменных окружения (только домены, без путей)
+cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_origins:
+    # Разделяем по запятой и очищаем от пробелов
+    additional_origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    CORS_ALLOWED_ORIGINS.extend(additional_origins)
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Только в режиме разработки

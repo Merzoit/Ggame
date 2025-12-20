@@ -193,8 +193,21 @@ CORS_ALLOWED_ORIGINS = [
 # Разрешаем CORS из переменных окружения (только домены, без путей)
 cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
 if cors_origins:
-    # Разделяем по запятой и очищаем от пробелов
-    additional_origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
+    # Разделяем по запятой и очищаем от пробелов и слэшей
+    additional_origins = []
+    for origin in cors_origins.split(','):
+        origin = origin.strip()
+        if origin:
+            # Убираем слэш в конце и проверяем формат
+            origin = origin.rstrip('/')
+            # Проверяем, что это домен без пути (для CORS)
+            if '://' in origin and '/' not in origin.split('://')[1]:
+                additional_origins.append(origin)
+            else:
+                # Игнорируем некорректные origins, логируем предупреждение
+                import sys
+                if '--verbosity' in sys.argv or not any(arg in sys.argv for arg in ['migrate', 'collectstatic']):
+                    print(f"Warning: Skipping invalid CORS origin: {origin}")
     CORS_ALLOWED_ORIGINS.extend(additional_origins)
 
 CORS_ALLOW_CREDENTIALS = True

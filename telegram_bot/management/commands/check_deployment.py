@@ -11,12 +11,12 @@ class Command(BaseCommand):
         """Диагностика состояния деплоя"""
 
         self.stdout.write(
-            self.style.SUCCESS('🔍 Диагностика деплоя GGame')
+            self.style.SUCCESS('Deployment diagnostics GGame')
         )
         self.stdout.write('')
 
         # 1. Проверка переменных окружения
-        self.stdout.write('📋 Переменные окружения:')
+        self.stdout.write('Environment variables:')
 
         env_vars = [
             'SECRET_KEY',
@@ -30,20 +30,20 @@ class Command(BaseCommand):
         ]
 
         for var in env_vars:
-            value = os.getenv(var, '❌ НЕ УСТАНОВЛЕНА')
+            value = os.getenv(var, 'NOT SET')
             if var in ['SECRET_KEY', 'TELEGRAM_BOT_TOKEN', 'DATABASE_URL']:
                 # Скрываем чувствительные данные
-                if value != '❌ НЕ УСТАНОВЛЕНА':
+                if value != 'NOT SET':
                     value = f'{value[:10]}...'
-            status = '✅' if value != '❌ НЕ УСТАНОВЛЕНА' else '❌'
+            status = 'OK' if value != 'NOT SET' else 'MISSING'
             self.stdout.write(f'  {status} {var}: {value}')
 
         self.stdout.write('')
 
         # 2. Проверка Django настроек
-        self.stdout.write('🔧 Django настройки:')
-        self.stdout.write(f'  DEBUG: {getattr(settings, "DEBUG", "не определено")}')
-        self.stdout.write(f'  SECRET_KEY установлен: {"✅" if hasattr(settings, "SECRET_KEY") and settings.SECRET_KEY else "❌"}')
+        self.stdout.write('Django settings:')
+        self.stdout.write(f'  DEBUG: {getattr(settings, "DEBUG", "not defined")}')
+        self.stdout.write(f'  SECRET_KEY set: {"YES" if hasattr(settings, "SECRET_KEY") and settings.SECRET_KEY else "NO"}')
 
         allowed_hosts = getattr(settings, 'ALLOWED_HOSTS', [])
         self.stdout.write(f'  ALLOWED_HOSTS: {allowed_hosts}')
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         # 3. Проверка Telegram бота
         bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
         if bot_token:
-            self.stdout.write('🤖 Проверка Telegram бота:')
+            self.stdout.write('Telegram bot check:')
 
             try:
                 # Получение информации о боте

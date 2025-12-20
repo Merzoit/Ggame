@@ -1,16 +1,27 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "public": true,
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "functions": {
+    "src/pages/api/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "public": true,
+  "regions": ["fra1"],
   "headers": [
     {
       "source": "/(.*)",
@@ -21,7 +32,7 @@
         },
         {
           "key": "X-Frame-Options",
-          "value": "DENY"
+          "value": "ALLOWALL"
         },
         {
           "key": "X-XSS-Protection",

@@ -65,21 +65,21 @@ export default {
 
   // Cards endpoints
   getCardTemplates(params = {}) {
-    return api.get('/cards/card-templates/', { params })
+    return api.get('/cards/templates/', { params })
   },
 
   getUserCards() {
-    return api.get('/cards/card-instances/')
+    return api.get('/cards/instances/')
   },
 
   acquireCard(templateId) {
-    return api.post('/cards/card-instances/acquire_card/', {
+    return api.post('/cards/instances/acquire_card/', {
       template_id: templateId
     })
   },
 
   sellCard(cardId) {
-    return api.post(`/cards/card-instances/${cardId}/sell_card/`)
+    return api.post(`/cards/instances/${cardId}/sell_card/`)
   },
 
   // Inventory endpoints
@@ -93,7 +93,7 @@ export default {
 
   // Anime universes and seasons
   getAnimeUniverses() {
-    return api.get('/cards/anime-universes/')
+    return api.get('/cards/universes/')
   },
 
   getSeasons(universeId = null) {
@@ -109,7 +109,7 @@ export default {
   getUserProfile() {
     const telegramId = localStorage.getItem('telegram_user_id')
     const params = telegramId ? { telegram_id: telegramId } : {}
-    return api.get('/cards/card-instances/get_user_profile/', { params })
+    return api.get('/cards/instances/get_user_profile/', { params })
   },
 
   getUserByTelegramId(telegramId) {

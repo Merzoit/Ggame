@@ -40,3 +40,20 @@ class RequestLoggingMiddleware:
         except Exception as e:
             print(f"=== EXCEPTION in middleware: {str(e)} ===")
             raise
+
+
+class CORSMiddleware:
+    """Добавляет CORS headers ко всем ответам"""
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
+        # Добавляем CORS headers для всех запросов
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response['Access-Control-Max-Age'] = '86400'
+
+        return response

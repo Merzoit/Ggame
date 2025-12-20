@@ -14,11 +14,16 @@ function initTelegramWebApp() {
   console.log('🔧 window.Telegram.WebApp:', window.Telegram?.WebApp)
 
   // Проверяем URL параметры для тестирования (например: ?test_user=123456789)
-  const urlParams = new URLSearchParams(window.location.search)
+  const searchParams = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const urlParams = new URLSearchParams([...searchParams.entries(), ...hashParams.entries()])
+
   const testUserId = urlParams.get('test_user')
   const userId = urlParams.get('user_id')
   console.log('🎯 URL test_user param:', testUserId)
   console.log('🎯 URL user_id param:', userId)
+  console.log('🔗 Hash:', window.location.hash)
+  console.log('🔗 Search:', window.location.search)
 
   // Проверяем tgWebAppData в URL
   const tgWebAppData = urlParams.get('tgWebAppData')
@@ -160,7 +165,9 @@ async function testApiCall() {
 // Настройка тестового пользователя
 function setupTestUser() {
   // Если указан test_user в URL, используем его
-  const urlParams = new URLSearchParams(window.location.search)
+  const searchParams = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const urlParams = new URLSearchParams([...searchParams.entries(), ...hashParams.entries()])
   const testUserId = urlParams.get('test_user') || '123456789'
 
   console.log('🎭 Setting up test user:', testUserId)

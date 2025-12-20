@@ -167,29 +167,45 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'options'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
-        print("=== NEW CODE VERSION v2: get_user_profile START ===")
+        print("=== NEW CODE VERSION v3: get_user_profile START ===")
+        print(f"DEBUG: Request method: {request.method}")
+        print(f"DEBUG: Request headers: {dict(request.headers)}")
+        print(f"DEBUG: Request user: {request.user}")
+        print(f"DEBUG: Request authenticated: {request.user.is_authenticated}")
+
         try:
             print(f"DEBUG: get_user_profile called with params: {request.query_params}")
 
             telegram_id = request.query_params.get('telegram_id')
-            print(f"DEBUG: telegram_id = {telegram_id}")
+            print(f"DEBUG: telegram_id = {telegram_id} (type: {type(telegram_id)})")
 
             if telegram_id:
+                # Конвертируем telegram_id в int если нужно
+                try:
+                    telegram_id_int = int(telegram_id)
+                    print(f"DEBUG: Converted telegram_id to int: {telegram_id_int}")
+                except (ValueError, TypeError):
+                    print(f"DEBUG: Failed to convert telegram_id {telegram_id} to int")
+                    return Response(
+                        {'error': 'Invalid telegram_id format'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
                 # Получаем пользователя по telegram_id
                 try:
                     from users.models import TelegramUser
-                    user = TelegramUser.objects.get(telegram_id=telegram_id)
+                    user = TelegramUser.objects.get(telegram_id=telegram_id_int)
                     print(f"DEBUG: Found user: {user.username} (ID: {user.id})")
                 except TelegramUser.DoesNotExist:
-                    print(f"DEBUG: User with telegram_id {telegram_id} not found")
+                    print(f"DEBUG: User with telegram_id {telegram_id_int} not found, creating...")
                     # Создать пользователя если не найден
                     user = TelegramUser.objects.create(
-                        telegram_id=telegram_id,
-                        username=f'user_{telegram_id}',
+                        telegram_id=telegram_id_int,
+                        username=f'user_{telegram_id_int}',
                         coins=1000,
-                        gems=100,
+                        gold=100,
                     )
-                    print(f"DEBUG: Created new user: {user.username}")
+                    print(f"DEBUG: Created new user: {user.username} (ID: {user.id})")
             elif request.user.is_authenticated:
                 user = request.user
                 print(f"DEBUG: Using authenticated user: {user.username}")

@@ -76,7 +76,7 @@ class CardInstanceSerializer(serializers.ModelSerializer):
 class DeckSerializer(serializers.ModelSerializer):
     """Сериализатор для колод"""
     owner_username = serializers.CharField(
-        source='owner.username_telegram',
+        source='owner.username',
         read_only=True
     )
     cards_count = serializers.SerializerMethodField()

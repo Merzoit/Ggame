@@ -193,13 +193,30 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
         # Получить или создать колоду
         deck, created = Deck.objects.get_or_create(owner=user)
 
+        # Получаем карты колоды с деталями
+        deck_cards_data = []
+        for deck_card in deck.deck_cards.select_related('card__template').all():
+            card = deck_card.card
+            deck_cards_data.append({
+                'id': card.id,
+                'position': deck_card.position,
+                'template': {
+                    'id': card.template.id,
+                    'name': card.template.name,
+                    'element': card.template.element,
+                },
+                'health': card.health,
+                'attack': card.attack,
+                'defense': card.defense,
+            })
+
         return Response({
             'user': {
                 'id': user.id,
                 'telegram_id': user.telegram_id,
                 'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
+                'first_name': user.first_name or '',
+                'last_name': user.last_name or '',
                 'total_games': user.total_games,
                 'games_won': user.games_won,
                 'total_points': user.total_points,
@@ -207,12 +224,25 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
                 'best_streak': user.best_streak,
                 'coins': user.coins,
                 'gems': user.gems,
-                'date_joined_telegram': user.date_joined_telegram.isoformat() if user.date_joined_telegram else None,
-                'last_activity': user.last_activity.isoformat() if user.last_activity else None,
                 'win_rate': user.win_rate,
             },
-            'cards': CardInstanceSerializer(cards, many=True).data,
-            'deck': DeckSerializer(deck).data,
+            'cards': [{
+                'id': card.id,
+                'template': {
+                    'id': card.template.id,
+                    'name': card.template.name,
+                    'element': card.template.element,
+                },
+                'health': card.health,
+                'attack': card.attack,
+                'defense': card.defense,
+                'acquired_at': card.acquired_at.isoformat(),
+            } for card in cards],
+            'deck': {
+                'id': deck.id,
+                'name': deck.name,
+                'cards': deck_cards_data,
+            },
         })
 
 

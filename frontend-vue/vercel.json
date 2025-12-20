@@ -12,15 +12,9 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "https://ggame-rfjvadu00-merzoits-projects.vercel.app/$1",
-      "status": 302
+      "dest": "/index.html"
     }
   ],
-  "functions": {
-    "src/pages/api/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "regions": ["fra1"],
   "headers": [
     {

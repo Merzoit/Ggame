@@ -167,7 +167,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
-        print("=== NEW CODE VERSION: get_user_profile START ===")
+        print("=== NEW CODE VERSION v2: get_user_profile START ===")
         try:
             print(f"DEBUG: get_user_profile called with params: {request.query_params}")
 

@@ -35,6 +35,13 @@ export const useGameStore = defineStore('game', () => {
       console.log('🔄 Starting fetchUserProfile...')
       loading.value = true
 
+      const telegramId = localStorage.getItem('telegram_user_id')
+      console.log('🆔 Telegram ID from localStorage:', telegramId)
+
+      if (!telegramId) {
+        throw new Error('No telegram_user_id found in localStorage')
+      }
+
       console.log('📡 Calling API getUserProfile...')
       const profileData = await api.getUserProfile()
       console.log('✅ API response:', profileData)

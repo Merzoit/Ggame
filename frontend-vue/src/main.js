@@ -11,6 +11,7 @@ function initTelegramWebApp() {
   console.log('📱 UserAgent:', navigator.userAgent)
   console.log('🌐 Location:', window.location.href)
   console.log('🔧 Telegram object:', window.Telegram)
+  console.log('🔧 window.Telegram.WebApp:', window.Telegram?.WebApp)
 
   // Проверяем URL параметры для тестирования (например: ?test_user=123456789)
   const urlParams = new URLSearchParams(window.location.search)
@@ -34,6 +35,7 @@ function initTelegramWebApp() {
     // Получаем данные пользователя
     const initData = webApp.initDataUnsafe
     console.log('📊 Init data:', initData)
+    console.log('📊 Init data user:', initData?.user)
 
     if (initData?.user) {
       const telegramId = initData.user.id
@@ -41,6 +43,7 @@ function initTelegramWebApp() {
 
       // Сохраняем telegramId для использования в API
       localStorage.setItem('telegram_user_id', telegramId)
+      console.log('💾 Saved to localStorage: telegram_user_id =', telegramId)
 
       // Для тестирования - создаем токен на основе telegramId
       const testToken = `test_token_${telegramId}`
@@ -49,6 +52,7 @@ function initTelegramWebApp() {
 
       // Показываем данные в UI
       window.telegramUserId = telegramId
+      console.log('🌐 window.telegramUserId set to:', telegramId)
     } else {
       console.log('⚠️ No user data in WebApp initData - using test mode')
       setupTestUser()

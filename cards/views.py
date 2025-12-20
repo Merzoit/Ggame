@@ -167,31 +167,44 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
+        print(f"DEBUG: get_user_profile called with params: {request.query_params}")
+
         telegram_id = request.query_params.get('telegram_id')
+        print(f"DEBUG: telegram_id = {telegram_id}")
 
         if telegram_id:
             # Получаем пользователя по telegram_id
             try:
                 from users.models import TelegramUser
                 user = TelegramUser.objects.get(telegram_id=telegram_id)
+                print(f"DEBUG: Found user: {user.username} (ID: {user.id})")
             except TelegramUser.DoesNotExist:
-                return Response(
-                    {'error': 'Пользователь не найден'},
-                    status=status.HTTP_404_NOT_FOUND
+                print(f"DEBUG: User with telegram_id {telegram_id} not found")
+                # Создать пользователя если не найден
+                user = TelegramUser.objects.create(
+                    telegram_id=telegram_id,
+                    username=f'user_{telegram_id}',
+                    coins=1000,
+                    gems=100,
                 )
+                print(f"DEBUG: Created new user: {user.username}")
         elif request.user.is_authenticated:
             user = request.user
+            print(f"DEBUG: Using authenticated user: {user.username}")
         else:
+            print("DEBUG: No telegram_id and not authenticated")
             return Response(
-                {'error': 'Необходима аутентификация'},
+                {'error': 'Необходим telegram_id или аутентификация'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
         # Получаем карты пользователя
         cards = CardInstance.objects.filter(owner=user)
+        print(f"DEBUG: Found {cards.count()} cards for user")
 
         # Получить или создать колоду
         deck, created = Deck.objects.get_or_create(owner=user)
+        print(f"DEBUG: Deck {'created' if created else 'found'}: {deck.name}")
 
         # Получаем карты колоды с деталями
         deck_cards_data = []
@@ -210,7 +223,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
                 'defense': card.defense,
             })
 
-        return Response({
+        response_data = {
             'user': {
                 'id': user.id,
                 'telegram_id': user.telegram_id,
@@ -243,7 +256,10 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
                 'name': deck.name,
                 'cards': deck_cards_data,
             },
-        })
+        }
+
+        print(f"DEBUG: Response data prepared successfully")
+        return Response(response_data)
 
 
 class DeckViewSet(viewsets.ViewSet):

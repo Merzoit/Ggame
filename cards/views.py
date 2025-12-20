@@ -238,7 +238,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
                     'current_streak': user.current_streak,
                     'best_streak': user.best_streak,
                     'coins': user.coins,
-                    'gems': user.gems,
+                    'gems': getattr(user, 'gems', getattr(user, 'gold', 0)),
                     'win_rate': user.win_rate,
                 },
                 'cards': [{

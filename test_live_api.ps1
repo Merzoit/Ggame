@@ -53,6 +53,24 @@ try {
     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
 }
 
+# 4. Тест админки
+Write-Host "4. Тест админки..." -ForegroundColor Yellow
+try {
+    $response = Invoke-WebRequest -Uri "$RAILWAY_URL/admin/" -Method GET -TimeoutSec 10
+    if ($response.StatusCode -eq 200) {
+        Write-Host "   [OK] Админка доступна" -ForegroundColor Green
+        if ($response.Content -match "Django") {
+            Write-Host "   [OK] Django админка загружена" -ForegroundColor Green
+        }
+    } elseif ($response.StatusCode -eq 302) {
+        Write-Host "   [OK] Редирект на логин (нормально)" -ForegroundColor Green
+    } else {
+        Write-Host "   [ERROR] Статус: $($response.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+
 Write-Host ""
 Write-Host "📋 Инструкции:" -ForegroundColor Cyan
 Write-Host "1. Настройте переменные окружения в Railway (см. RAILWAY_SETUP.md)" -ForegroundColor White

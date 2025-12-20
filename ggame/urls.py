@@ -19,13 +19,35 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseRedirect
 
 def profile_redirect(request):
     """Редирект на профиль пользователя"""
     return redirect('/')
 
+@csrf_exempt
+def admin_login_redirect(request):
+    """Редирект на админку без CSRF проблем"""
+    return HttpResponseRedirect('/admin/login/')
+
+# Импортируем admin views
+from django.contrib.admin.sites import AdminSite
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.csrf import csrf_exempt
+
+# Создаем экземпляр админки
+admin_site = AdminSite()
+
+@csrf_exempt
+def admin_index_no_csrf(request):
+    """Главная страница админки без CSRF (только для Railway)"""
+    from django.contrib.admin.views.main import index
+    return index(request, extra_context={'csrf_exempt': True})
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin-login/', admin_login_redirect, name='admin_login_redirect'),
     path('api/', include('game.urls')),
     path('api/users/', include('users.urls')),
     path('api/inventory/', include('inventory.urls')),

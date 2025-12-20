@@ -186,6 +186,7 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 # CORS настройки
 CORS_ALLOWED_ORIGINS = [
     'https://ggame-psi.vercel.app',
+    'https://sunny-sunflower-371a55.netlify.app',
     'http://localhost:5173',
     'http://localhost:3000',
     'http://127.0.0.1:5173',
@@ -213,6 +214,29 @@ if cors_origins:
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Только в режиме разработки
+
+# Разрешить все методы для Telegram WebApp
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Разрешить все заголовки
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Django REST Framework настройки
 REST_FRAMEWORK = {

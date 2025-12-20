@@ -113,10 +113,11 @@ def telegram_webhook(request):
                 # URL фронтенда берем из настроек
                 from django.conf import settings
                 frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ggame.vercel.app')
-                web_app_url = f"{frontend_url}/#/profile"
+                web_app_url = f"{frontend_url}/#/profile?user_id={user.telegram_id}"
 
                 logger.info(f"Frontend URL: {frontend_url}")
                 logger.info(f"Web app URL: {web_app_url}")
+                logger.info(f"User Telegram ID: {user.telegram_id}")
 
                 reply_markup = {
                     'inline_keyboard': [[{

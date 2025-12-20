@@ -91,5 +91,16 @@ export default {
   getSeasons(universeId = null) {
     const params = universeId ? { universe: universeId } : {}
     return api.get('/cards/seasons/', { params })
+  },
+
+  // User endpoints
+  getUserByTelegramId(telegramId) {
+    return api.get(`/users/by_telegram/${telegramId}/`)
+  },
+
+  getUserCardsByTelegramId(telegramId) {
+    return api.get('/cards/instances/', {
+      params: { telegram_id: telegramId }
+    })
   }
 }

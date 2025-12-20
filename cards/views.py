@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import AnimeUniverse, Season, CardTemplate, CardInstance, Deck, DeckCard
 from .serializers import (
     AnimeUniverseSerializer, SeasonSerializer,
@@ -62,11 +62,30 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     ViewSet для управления картами игрока
     """
     serializer_class = CardInstanceSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """Разрешить доступ без аутентификации для запросов с telegram_id"""
+        if self.request.query_params.get('telegram_id'):
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
-        """Возвращает только карты текущего пользователя"""
-        return CardInstance.objects.filter(owner=self.request.user)
+        """Возвращает карты пользователя (по telegram_id или текущего)"""
+        telegram_id = self.request.query_params.get('telegram_id')
+        if telegram_id:
+            # Получаем пользователя по telegram_id
+            try:
+                from users.models import TelegramUser
+                user = TelegramUser.objects.get(telegram_id=telegram_id)
+                return CardInstance.objects.filter(owner=user)
+            except TelegramUser.DoesNotExist:
+                return CardInstance.objects.none()
+
+        # Для аутентифицированных пользователей - их карты
+        if self.request.user.is_authenticated:
+            return CardInstance.objects.filter(owner=self.request.user)
+
+        return CardInstance.objects.none()
 
     @action(detail=False, methods=['post'])
     def acquire_card(self, request):

@@ -181,9 +181,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useGameStore } from '../stores/game'
 import api from '../services/api'
 
+const route = useRoute()
 const gameStore = useGameStore()
 const settings = ref({
   notifications: true,
@@ -199,6 +201,9 @@ const userStats = ref({
   date_joined_telegram: null,
   last_activity: null
 })
+
+// Получаем user_id из URL параметров
+const userId = computed(() => route.query.user_id)
 
 const userName = computed(() => {
   const user = gameStore.user || gameStore.deck?.owner
@@ -264,32 +269,54 @@ function formatDate(dateString) {
 
 async function loadUserStats() {
   try {
-    // Получаем данные пользователя из deck или используем моковые данные
-    if (gameStore.deck?.owner) {
-      const owner = gameStore.deck.owner
-      userStats.value = {
-        total_games: owner.total_games || 0,
-        games_won: owner.games_won || 0,
-        total_points: owner.total_points || 0,
-        current_streak: owner.current_streak || 0,
-        best_streak: owner.best_streak || 0,
-        date_joined_telegram: owner.date_joined_telegram,
-        last_activity: owner.last_activity
+    // Если есть user_id в URL, загружаем данные конкретного пользователя
+    if (userId.value) {
+      console.log('Loading user data for telegram_id:', userId.value)
+      const userData = await api.getUserByTelegramId(userId.value)
+
+      if (userData) {
+        userStats.value = {
+          total_games: userData.total_games || 0,
+          games_won: userData.games_won || 0,
+          total_points: userData.total_points || 0,
+          current_streak: userData.current_streak || 0,
+          best_streak: userData.best_streak || 0,
+          date_joined_telegram: userData.date_joined_telegram,
+          last_activity: userData.last_activity
+        }
+
+        // Обновляем user в store
+        gameStore.user = userData
+        console.log('User data loaded:', userData)
       }
-      
-      // Обновляем user в store
-      if (!gameStore.user) {
-        gameStore.user = owner
-      }
-    } else if (gameStore.user) {
-      userStats.value = {
-        total_games: gameStore.user.total_games || 0,
-        games_won: gameStore.user.games_won || 0,
-        total_points: gameStore.user.total_points || 0,
-        current_streak: gameStore.user.current_streak || 0,
-        best_streak: gameStore.user.best_streak || 0,
-        date_joined_telegram: gameStore.user.date_joined_telegram,
-        last_activity: gameStore.user.last_activity
+    } else {
+      // Используем данные из deck или store (для обычной навигации)
+      if (gameStore.deck?.owner) {
+        const owner = gameStore.deck.owner
+        userStats.value = {
+          total_games: owner.total_games || 0,
+          games_won: owner.games_won || 0,
+          total_points: owner.total_points || 0,
+          current_streak: owner.current_streak || 0,
+          best_streak: owner.best_streak || 0,
+          date_joined_telegram: owner.date_joined_telegram,
+          last_activity: owner.last_activity
+        }
+
+        // Обновляем user в store
+        if (!gameStore.user) {
+          gameStore.user = owner
+        }
+      } else if (gameStore.user) {
+        userStats.value = {
+          total_games: gameStore.user.total_games || 0,
+          games_won: gameStore.user.games_won || 0,
+          total_points: gameStore.user.total_points || 0,
+          current_streak: gameStore.user.current_streak || 0,
+          best_streak: gameStore.user.best_streak || 0,
+          date_joined_telegram: gameStore.user.date_joined_telegram,
+          last_activity: gameStore.user.last_activity
+        }
       }
     }
   } catch (error) {
@@ -299,7 +326,14 @@ async function loadUserStats() {
 
 async function loadUserCards() {
   try {
-    const cards = await api.getUserCards()
+    let cards
+    if (userId.value) {
+      // Загружаем карты конкретного пользователя
+      cards = await api.getUserCardsByTelegramId(userId.value)
+    } else {
+      // Загружаем карты текущего пользователя
+      cards = await api.getUserCards()
+    }
     userCards.value = Array.isArray(cards) ? cards : cards.results || []
   } catch (error) {
     console.error('Failed to load user cards:', error)

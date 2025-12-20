@@ -8,4 +8,5 @@ router = DefaultRouter()
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('by_telegram/<int:telegram_id>/', views.get_user_by_telegram_id, name='user_by_telegram'),
 ]

@@ -62,6 +62,12 @@ try {
         if ($response.Content -match "Django") {
             Write-Host "   [OK] Django админка загружена" -ForegroundColor Green
         }
+        # Проверяем CSS
+        if ($response.Content -match "admin/css") {
+            Write-Host "   [OK] CSS ссылки найдены" -ForegroundColor Green
+        } else {
+            Write-Host "   [WARNING] CSS ссылки не найдены" -ForegroundColor Yellow
+        }
     } elseif ($response.StatusCode -eq 302) {
         Write-Host "   [OK] Редирект на логин (нормально)" -ForegroundColor Green
     } else {
@@ -69,6 +75,19 @@ try {
     }
 } catch {
     Write-Host "   [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# 5. Тест статических файлов
+Write-Host "5. Тест статических файлов..." -ForegroundColor Yellow
+try {
+    $response = Invoke-WebRequest -Uri "$RAILWAY_URL/static/admin/css/base.css" -Method GET -TimeoutSec 10
+    if ($response.StatusCode -eq 200) {
+        Write-Host "   [OK] CSS файл доступен" -ForegroundColor Green
+    } else {
+        Write-Host "   [ERROR] CSS файл не найден: $($response.StatusCode)" -ForegroundColor Red
+    }
+} catch {
+    Write-Host "   [ERROR] CSS файл недоступен: $($_.Exception.Message)" -ForegroundColor Red
 }
 
 Write-Host ""

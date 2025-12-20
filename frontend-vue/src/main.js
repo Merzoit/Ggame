@@ -9,6 +9,10 @@ import api from './services/api'
 function initTelegramWebApp() {
   console.log('🎮 Initializing Telegram WebApp...')
 
+  // Проверяем URL параметры для тестирования (например: ?test_user=123456789)
+  const urlParams = new URLSearchParams(window.location.search)
+  const testUserId = urlParams.get('test_user')
+
   if (window.Telegram?.WebApp) {
     console.log('✅ Telegram WebApp detected')
     const webApp = window.Telegram.WebApp
@@ -33,25 +37,30 @@ function initTelegramWebApp() {
       localStorage.setItem('ggame_token', testToken)
       console.log('🔑 Token set:', testToken)
     } else {
-      console.log('⚠️ No user data in initData')
-      // Для тестирования в браузере без Telegram
-      const testToken = 'test_token_123456789'
-      localStorage.setItem('ggame_token', testToken)
-      localStorage.setItem('telegram_user_id', '123456789')
+      console.log('⚠️ No user data in initData - using test mode')
+      setupTestUser()
     }
 
     // Настраиваем цвета WebApp
     webApp.setHeaderColor('#141420')
     webApp.setBackgroundColor('#0a0a0f')
   } else {
-    console.log('⚠️ Telegram WebApp not detected - browser mode')
-    // Для тестирования в браузере без Telegram
-    const testToken = 'test_token_123456789'
-    localStorage.setItem('ggame_token', testToken)
-    localStorage.setItem('telegram_user_id', '123456789')
+    console.log('⚠️ Telegram WebApp not detected - browser test mode')
+    setupTestUser()
   }
 
   console.log('🎮 Telegram WebApp initialization completed')
+}
+
+// Настройка тестового пользователя
+function setupTestUser() {
+  // Если указан test_user в URL, используем его
+  const urlParams = new URLSearchParams(window.location.search)
+  const testUserId = urlParams.get('test_user') || '123456789'
+
+  console.log('🎭 Setting up test user:', testUserId)
+  localStorage.setItem('telegram_user_id', testUserId)
+  localStorage.setItem('ggame_token', `test_token_${testUserId}`)
 }
 
 const app = createApp(App)

@@ -167,6 +167,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
+        print("=== NEW CODE VERSION: get_user_profile START ===")
         try:
             print(f"DEBUG: get_user_profile called with params: {request.query_params}")
 
@@ -267,11 +268,15 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
             return Response(response_data)
 
         except Exception as e:
-            print(f"DEBUG: ERROR in get_user_profile: {str(e)}")
+            print(f"=== DEBUG: CRITICAL ERROR in get_user_profile ===")
+            print(f"DEBUG: ERROR MESSAGE: {str(e)}")
+            print(f"DEBUG: ERROR TYPE: {type(e).__name__}")
             import traceback
-            print(f"DEBUG: Traceback: {traceback.format_exc()}")
+            print(f"DEBUG: FULL TRACEBACK:")
+            print(traceback.format_exc())
+            print(f"=== END DEBUG ===")
             return Response(
-                {'error': f'Internal server error: {str(e)}'},
+                {'error': f'Internal server error: {str(e)}', 'traceback': traceback.format_exc()},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

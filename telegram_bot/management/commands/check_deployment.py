@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 if value != 'NOT SET':
                     value = f'{value[:10]}...'
             status = 'OK' if value != 'NOT SET' else 'MISSING'
-            self.stdout.write(f'  {status} {var}: {value}')
+            self.stdout.write(f'  [{status}] {var}: {value}')
 
         self.stdout.write('')
 

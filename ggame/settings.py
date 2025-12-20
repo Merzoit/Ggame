@@ -213,7 +213,7 @@ if cors_origins:
     CORS_ALLOWED_ORIGINS.extend(additional_origins)
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Только в режиме разработки
+CORS_ALLOW_ALL_ORIGINS = True  # Временно разрешить все origins для тестирования
 
 # Разрешить все методы для Telegram WebApp
 CORS_ALLOW_METHODS = [

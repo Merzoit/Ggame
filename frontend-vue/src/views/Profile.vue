@@ -31,8 +31,8 @@
         <div class="currency-card">
           <div class="currency-icon-large">💰</div>
           <div class="currency-info">
-            <div class="currency-label">Золото</div>
-            <div class="currency-value">{{ gameStore.userGold }}</div>
+            <div class="currency-label">Кристаллы</div>
+            <div class="currency-value">{{ gameStore.userGems }}</div>
           </div>
         </div>
       </div>
@@ -341,10 +341,7 @@ async function loadUserCards() {
 }
 
 onMounted(async () => {
-  await gameStore.fetchDeck()
-  await gameStore.fetchInventory()
-  await loadUserCards()
-  await loadUserStats()
+  await gameStore.fetchUserProfile()
 })
 </script>
 

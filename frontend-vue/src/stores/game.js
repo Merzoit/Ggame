@@ -13,7 +13,7 @@ export const useGameStore = defineStore('game', () => {
 
   // Getters
   const userCoins = computed(() => user.value?.coins || 0)
-  const userGold = computed(() => user.value?.gold || 0)
+  const userGems = computed(() => user.value?.gems || 0)
   const deckStats = computed(() => deck.value?.total_stats || { health: 0, attack: 0, defense: 0 })
   const isDeckValid = computed(() => deck.value?.is_valid_deck?.valid || false)
 
@@ -21,10 +21,25 @@ export const useGameStore = defineStore('game', () => {
   async function fetchUser() {
     try {
       loading.value = true
-      // TODO: Implement user API endpoint
-      // user.value = await api.getUser()
+      user.value = await api.getCurrentUser()
     } catch (err) {
       error.value = err.message
+      console.error('Failed to fetch user:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchUserProfile() {
+    try {
+      loading.value = true
+      const profileData = await api.getUserProfile()
+      user.value = profileData.user
+      deck.value = profileData.deck
+      inventory.value = profileData.cards
+    } catch (err) {
+      error.value = err.message
+      console.error('Failed to fetch user profile:', err)
     } finally {
       loading.value = false
     }
@@ -56,10 +71,10 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  async function removeCardFromDeck(position) {
+  async function removeCardFromDeck(cardId) {
     try {
       loading.value = true
-      await api.removeCardFromDeck(position)
+      await api.removeCardFromDeck(cardId)
       await fetchDeck()
       return true
     } catch (err) {
@@ -125,11 +140,12 @@ export const useGameStore = defineStore('game', () => {
     error,
     // Getters
     userCoins,
-    userGold,
+    userGems,
     deckStats,
     isDeckValid,
     // Actions
     fetchUser,
+    fetchUserProfile,
     fetchDeck,
     addCardToDeck,
     removeCardFromDeck,

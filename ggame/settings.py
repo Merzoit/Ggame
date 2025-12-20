@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 
     # Third-party apps
     'rest_framework',
+    'rest_framework.authtoken',  # Token authentication
     'corsheaders',  # CORS для фронтенда
 ]
 
@@ -216,10 +217,12 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG  # Только в режиме разработ�
 # Django REST Framework настройки
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        # Временно отключена аутентификация для тестирования
+        # 'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

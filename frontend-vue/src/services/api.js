@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://web-production-051b.up.railway.app/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +14,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('ggame_token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Token ${token}`
     }
     return config
   },
@@ -49,29 +49,29 @@ export default {
     })
   },
 
-  removeCardFromDeck(position) {
+  removeCardFromDeck(cardId) {
     return api.post('/cards/decks/remove_card/', {
-      position
+      card_id: cardId
     })
   },
 
   // Cards endpoints
   getCardTemplates(params = {}) {
-    return api.get('/cards/templates/', { params })
+    return api.get('/cards/card-templates/', { params })
   },
 
   getUserCards() {
-    return api.get('/cards/instances/')
+    return api.get('/cards/card-instances/')
   },
 
   acquireCard(templateId) {
-    return api.post('/cards/instances/acquire_card/', {
+    return api.post('/cards/card-instances/acquire_card/', {
       template_id: templateId
     })
   },
 
   sellCard(cardId) {
-    return api.post(`/cards/instances/${cardId}/sell_card/`)
+    return api.post(`/cards/card-instances/${cardId}/sell_card/`)
   },
 
   // Inventory endpoints
@@ -85,7 +85,7 @@ export default {
 
   // Anime universes and seasons
   getAnimeUniverses() {
-    return api.get('/cards/universes/')
+    return api.get('/cards/anime-universes/')
   },
 
   getSeasons(universeId = null) {
@@ -94,6 +94,14 @@ export default {
   },
 
   // User endpoints
+  getCurrentUser() {
+    return api.get('/users/me/')
+  },
+
+  getUserProfile() {
+    return api.get('/cards/card-instances/get_user_profile/')
+  },
+
   getUserByTelegramId(telegramId) {
     return api.get(`/users/by_telegram/${telegramId}/`)
   },

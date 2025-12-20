@@ -114,7 +114,7 @@ async function removeCard(position) {
 }
 
 onMounted(async () => {
-  await gameStore.fetchDeck()
+  await gameStore.fetchUserProfile()
 })
 </script>
 

@@ -24,12 +24,16 @@ class RequestLoggingMiddleware:
         print(f"Headers: {dict(request.headers)}")
         print(f"Query params: {request.GET}")
         print(f"User agent: {request.META.get('HTTP_USER_AGENT', 'Unknown')}")
+        print(f"User: {request.user}")
+        print(f"Auth: {request.auth}")
 
         if request.method == 'OPTIONS':
             print("CORS preflight request detected")
 
         try:
+            print("=== CALLING get_response ===")
             response = self.get_response(request)
+            print("=== get_response completed ===")
 
             # Логируем ответ
             print(f"=== RESPONSE: {response.status_code} ===")
@@ -39,6 +43,10 @@ class RequestLoggingMiddleware:
 
         except Exception as e:
             print(f"=== EXCEPTION in middleware: {str(e)} ===")
+            import traceback
+            print("=== FULL TRACEBACK ===")
+            traceback.print_exc()
+            print("=== END TRACEBACK ===")
             raise
 
 

@@ -167,11 +167,14 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'options'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
-        print("=== NEW CODE VERSION v3: get_user_profile START ===")
+        print("=== NEW CODE VERSION v4: get_user_profile START ===")
         print(f"DEBUG: Request method: {request.method}")
-        print(f"DEBUG: Request headers: {dict(request.headers)}")
+        print(f"DEBUG: Request path: {request.path}")
         print(f"DEBUG: Request user: {request.user}")
+        print(f"DEBUG: Request auth: {request.auth}")
         print(f"DEBUG: Request authenticated: {request.user.is_authenticated}")
+        print(f"DEBUG: Request headers: {dict(request.headers)}")
+        print("=== VIEW METHOD CALLED SUCCESSFULLY ===")
 
         try:
             print(f"DEBUG: get_user_profile called with params: {request.query_params}")

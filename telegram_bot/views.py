@@ -1,11 +1,78 @@
 import json
 import logging
+import os
+import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.utils import timezone
+from users.models import TelegramUser
 
 logger = logging.getLogger(__name__)
+
+
+def send_message(chat_id, text, reply_markup=None):
+    """
+    Отправка сообщения в Telegram
+    """
+    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        'chat_id': chat_id,
+        'text': text,
+        'parse_mode': 'HTML'
+    }
+
+    if reply_markup:
+        payload['reply_markup'] = reply_markup
+
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Ошибка отправки сообщения: {e}")
+        return None
+
+
+def register_or_get_user(telegram_data):
+    """
+    Регистрация или получение существующего пользователя
+    """
+    try:
+        telegram_id = telegram_data['id']
+        username = telegram_data.get('username')
+        first_name = telegram_data.get('first_name')
+        last_name = telegram_data.get('last_name')
+        language_code = telegram_data.get('language_code', 'ru')
+
+        user, created = TelegramUser.objects.get_or_create(
+            telegram_id=telegram_id,
+            defaults={
+                'username_telegram': username,
+                'first_name_telegram': first_name,
+                'last_name_telegram': last_name,
+                'language': language_code,
+                'last_activity': timezone.now(),
+                'is_active': True
+            }
+        )
+
+        if not created:
+            # Обновляем данные пользователя
+            user.username_telegram = username
+            user.first_name_telegram = first_name
+            user.last_name_telegram = last_name
+            user.language = language_code
+            user.last_activity = timezone.now()
+            user.save()
+
+        logger.info(f"Пользователь {'создан' if created else 'обновлен'}: {user}")
+        return user, created
+
+    except Exception as e:
+        logger.error(f"Ошибка создания/получения пользователя: {e}")
+        return None, False
 
 
 @csrf_exempt
@@ -19,8 +86,48 @@ def telegram_webhook(request):
         data = json.loads(request.body.decode('utf-8'))
         logger.info(f"Получены данные от Telegram: {data}")
 
-        # Здесь будет логика обработки сообщений
-        # Пока просто логируем и возвращаем OK
+        # Проверяем наличие сообщения
+        if 'message' not in data:
+            return JsonResponse({'status': 'ok'})
+
+        message = data['message']
+        chat_id = message['chat']['id']
+        text = message.get('text', '')
+        from_user = message.get('from', {})
+
+        # Обрабатываем команду /start
+        if text == '/start':
+            # Регистрируем пользователя
+            user, created = register_or_get_user(from_user)
+
+            if user:
+                # Создаем кнопку для открытия веб-приложения
+                # URL фронтенда берем из настроек
+                from django.conf import settings
+                frontend_url = getattr(settings, 'FRONTEND_URL', 'https://ggame.vercel.app')
+                web_app_url = f"{frontend_url}/#/profile"
+
+                reply_markup = {
+                    'inline_keyboard': [[{
+                        'text': '🎮 Начать игру',
+                        'web_app': {
+                            'url': web_app_url
+                        }
+                    }]]
+                }
+
+                welcome_text = f"""🎉 Добро пожаловать в GGame, {user.first_name_telegram or user.username_telegram or 'Игрок'}!
+
+🃏 Это карточная боевая игра с коллекционными картами
+💰 У вас есть {user.coins} монет и {user.gold} золота
+🏆 Набрано {user.total_points} очков
+
+Нажмите кнопку ниже, чтобы начать игру!"""
+
+                send_message(chat_id, welcome_text, reply_markup)
+
+            else:
+                send_message(chat_id, "❌ Ошибка регистрации. Попробуйте позже.")
 
         return JsonResponse({'status': 'ok'})
 

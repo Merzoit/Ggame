@@ -18,6 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+
+def profile_redirect(request):
+    """Редирект на профиль пользователя"""
+    return redirect('/')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +31,7 @@ urlpatterns = [
     path('api/inventory/', include('inventory.urls')),
     path('api/cards/', include('cards.urls')),
     path('api/telegram/', include('telegram_bot.urls')),
+    path('profile/', profile_redirect, name='profile_redirect'),
 ]
 
 # Для разработки - обслуживание медиа файлов

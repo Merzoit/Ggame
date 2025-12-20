@@ -140,7 +140,20 @@ CORS_ALLOWED_ORIGINS=https://ggame.vercel.app
 
 ## 🔧 Настройка после деплоя
 
-### 1. Создайте суперпользователя
+### 1. Настройте Telegram бота
+
+После деплоя бэкенда настройте вебхук для бота:
+
+```bash
+# Установите переменные окружения
+export TELEGRAM_WEBHOOK_URL=https://ваш-бэкенд.railway.app
+export FRONTEND_URL=https://ваш-фронтенд.vercel.app
+
+# Установите вебхук
+python manage.py set_webhook --url https://ваш-бэкенд.railway.app/api/telegram/webhook/
+```
+
+### 2. Создайте суперпользователя
 
 Подключитесь к серверу через Railway/Render консоль или SSH:
 
@@ -148,13 +161,13 @@ CORS_ALLOWED_ORIGINS=https://ggame.vercel.app
 python manage.py createsuperuser
 ```
 
-### 2. Соберите статические файлы
+### 3. Соберите статические файлы
 
 ```bash
 python manage.py collectstatic --noinput
 ```
 
-### 3. Примените миграции
+### 4. Примените миграции
 
 ```bash
 python manage.py migrate
@@ -178,8 +191,9 @@ DEBUG=False
 ALLOWED_HOSTS=ваш-домен.railway.app
 DATABASE_URL=postgresql://...
 CORS_ALLOWED_ORIGINS=https://ваш-фронтенд.vercel.app
-TELEGRAM_BOT_TOKEN=ваш-токен-бота
-TELEGRAM_WEBHOOK_URL=https://ваш-бэкенд.railway.app/api/telegram/webhook/
+TELEGRAM_BOT_TOKEN=8567389465:AAGf6VKykyl6REaiDz-Vqu2QTacQbvURS7k
+TELEGRAM_WEBHOOK_URL=https://ваш-бэкенд.railway.app
+FRONTEND_URL=https://ваш-фронтенд.vercel.app
 ```
 
 ### Vue (фронтенд):

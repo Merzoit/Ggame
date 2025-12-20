@@ -165,8 +165,9 @@ GAME_SETTINGS = {
 }
 
 # Telegram Bot настройки (загрузить из переменных окружения)
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8567389465:AAGf6VKykyl6REaiDz-Vqu2QTacQbvURS7k')
 TELEGRAM_WEBHOOK_URL = os.getenv('TELEGRAM_WEBHOOK_URL', '')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://ggame.vercel.app')
 
 # CORS настройки
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if os.getenv('CORS_ALLOWED_ORIGINS') else [

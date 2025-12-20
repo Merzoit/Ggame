@@ -1,0 +1,25 @@
+# Ignore Python/Django files (Railway backend)
+*.py
+requirements.txt
+runtime.txt
+Procfile
+railway.json
+
+# Ignore backend directories
+cards/
+game/
+ggame/
+inventory/
+telegram_bot/
+users/
+manage.py
+db.sqlite3
+
+# Ignore other configs
+*.ps1
+*.sh
+*.md
+!frontend-vue/
+
+# Keep frontend files
+!frontend-vue/**

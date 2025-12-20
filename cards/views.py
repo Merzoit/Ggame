@@ -164,7 +164,7 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
             'coins_earned': sell_price
         })
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get', 'options'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
         print("=== NEW CODE VERSION v2: get_user_profile START ===")

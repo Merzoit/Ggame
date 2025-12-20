@@ -30,12 +30,19 @@ api.interceptors.request.use(
 // Response interceptor для обработки ошибок
 api.interceptors.response.use(
   (response) => {
-    console.log('📨 API Response:', response.status, response.config.url)
+    console.log('📨 API Response:', response.status, response.config.url, 'Data:', response.data)
     return response.data
   },
   (error) => {
-    console.error('❌ API Error:', error.response?.status, error.response?.data || error.message)
-    const message = error.response?.data?.message || error.response?.data?.error || error.message
+    console.error('❌ API Error Details:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      headers: error.response?.headers,
+      data: error.response?.data,
+      url: error.config?.url,
+      method: error.config?.method
+    })
+    const message = error.response?.data?.message || error.response?.data?.error || error.response?.data || error.message
     return Promise.reject(new Error(message))
   }
 )

@@ -8,18 +8,28 @@ import api from './services/api'
 // Инициализация Telegram WebApp
 function initTelegramWebApp() {
   console.log('🎮 Initializing Telegram WebApp...')
+  console.log('📱 UserAgent:', navigator.userAgent)
+  console.log('🌐 Location:', window.location.href)
+  console.log('🔧 Telegram object:', window.Telegram)
 
   // Проверяем URL параметры для тестирования (например: ?test_user=123456789)
   const urlParams = new URLSearchParams(window.location.search)
   const testUserId = urlParams.get('test_user')
+  console.log('🎯 URL test_user param:', testUserId)
 
   if (window.Telegram?.WebApp) {
     console.log('✅ Telegram WebApp detected')
     const webApp = window.Telegram.WebApp
+    console.log('📋 WebApp object:', webApp)
 
-    // Разрешаем закрытие WebApp
-    webApp.ready()
-    webApp.expand()
+    try {
+      // Разрешаем закрытие WebApp
+      webApp.ready()
+      webApp.expand()
+      console.log('✅ WebApp ready and expanded')
+    } catch (e) {
+      console.error('❌ Error initializing WebApp:', e)
+    }
 
     // Получаем данные пользователя
     const initData = webApp.initDataUnsafe
@@ -27,7 +37,7 @@ function initTelegramWebApp() {
 
     if (initData?.user) {
       const telegramId = initData.user.id
-      console.log('👤 User ID:', telegramId)
+      console.log('👤 User ID from WebApp:', telegramId)
 
       // Сохраняем telegramId для использования в API
       localStorage.setItem('telegram_user_id', telegramId)
@@ -36,20 +46,59 @@ function initTelegramWebApp() {
       const testToken = `test_token_${telegramId}`
       localStorage.setItem('ggame_token', testToken)
       console.log('🔑 Token set:', testToken)
+
+      // Показываем данные в UI
+      window.telegramUserId = telegramId
     } else {
-      console.log('⚠️ No user data in initData - using test mode')
+      console.log('⚠️ No user data in WebApp initData - using test mode')
       setupTestUser()
     }
 
     // Настраиваем цвета WebApp
-    webApp.setHeaderColor('#141420')
-    webApp.setBackgroundColor('#0a0a0f')
+    try {
+      webApp.setHeaderColor('#141420')
+      webApp.setBackgroundColor('#0a0a0f')
+      console.log('🎨 WebApp colors set')
+    } catch (e) {
+      console.error('❌ Error setting WebApp colors:', e)
+    }
   } else {
     console.log('⚠️ Telegram WebApp not detected - browser test mode')
     setupTestUser()
   }
 
   console.log('🎮 Telegram WebApp initialization completed')
+
+  // Запускаем тестовый API запрос через 2 секунды
+  setTimeout(() => {
+    console.log('🚀 Starting test API call...')
+    testApiCall()
+  }, 2000)
+}
+
+// Тестовый API вызов
+async function testApiCall() {
+  try {
+    console.log('📡 Making test API call to get_user_profile')
+    const telegramId = localStorage.getItem('telegram_user_id') || '680756851'
+    console.log('🆔 Using telegram_id:', telegramId)
+
+    const response = await fetch(`https://web-production-051b.up.railway.app/api/cards/instances/get_user_profile/?telegram_id=${telegramId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    console.log('📨 API Response status:', response.status)
+    console.log('📨 API Response headers:', Object.fromEntries(response.headers.entries()))
+
+    const data = await response.text()
+    console.log('📄 API Response data:', data.substring(0, 500))
+
+  } catch (error) {
+    console.error('❌ API call failed:', error)
+  }
 }
 
 // Настройка тестового пользователя

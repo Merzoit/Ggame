@@ -167,99 +167,113 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def get_user_profile(self, request):
         """Получить профиль пользователя с его картами и колодой"""
-        print(f"DEBUG: get_user_profile called with params: {request.query_params}")
+        try:
+            print(f"DEBUG: get_user_profile called with params: {request.query_params}")
 
-        telegram_id = request.query_params.get('telegram_id')
-        print(f"DEBUG: telegram_id = {telegram_id}")
+            telegram_id = request.query_params.get('telegram_id')
+            print(f"DEBUG: telegram_id = {telegram_id}")
 
-        if telegram_id:
-            # Получаем пользователя по telegram_id
-            try:
-                from users.models import TelegramUser
-                user = TelegramUser.objects.get(telegram_id=telegram_id)
-                print(f"DEBUG: Found user: {user.username} (ID: {user.id})")
-            except TelegramUser.DoesNotExist:
-                print(f"DEBUG: User with telegram_id {telegram_id} not found")
-                # Создать пользователя если не найден
-                user = TelegramUser.objects.create(
-                    telegram_id=telegram_id,
-                    username=f'user_{telegram_id}',
-                    coins=1000,
-                    gems=100,
+            if telegram_id:
+                # Получаем пользователя по telegram_id
+                try:
+                    from users.models import TelegramUser
+                    user = TelegramUser.objects.get(telegram_id=telegram_id)
+                    print(f"DEBUG: Found user: {user.username} (ID: {user.id})")
+                except TelegramUser.DoesNotExist:
+                    print(f"DEBUG: User with telegram_id {telegram_id} not found")
+                    # Создать пользователя если не найден
+                    user = TelegramUser.objects.create(
+                        telegram_id=telegram_id,
+                        username=f'user_{telegram_id}',
+                        coins=1000,
+                        gems=100,
+                    )
+                    print(f"DEBUG: Created new user: {user.username}")
+            elif request.user.is_authenticated:
+                user = request.user
+                print(f"DEBUG: Using authenticated user: {user.username}")
+            else:
+                print("DEBUG: No telegram_id and not authenticated")
+                return Response(
+                    {'error': 'Необходим telegram_id или аутентификация'},
+                    status=status.HTTP_401_UNAUTHORIZED
                 )
-                print(f"DEBUG: Created new user: {user.username}")
-        elif request.user.is_authenticated:
-            user = request.user
-            print(f"DEBUG: Using authenticated user: {user.username}")
-        else:
-            print("DEBUG: No telegram_id and not authenticated")
+
+            # Получаем карты пользователя
+            cards = CardInstance.objects.filter(owner=user)
+            print(f"DEBUG: Found {cards.count()} cards for user")
+
+            # Получить или создать колоду
+            deck, created = Deck.objects.get_or_create(owner=user)
+            print(f"DEBUG: Deck {'created' if created else 'found'}: {deck.name}")
+
+            # Получаем карты колоды с деталями
+            deck_cards_data = []
+            for deck_card in deck.deck_cards.select_related('card__template').all():
+                card = deck_card.card
+                deck_cards_data.append({
+                    'id': card.id,
+                    'position': deck_card.position,
+                    'template': {
+                        'id': card.template.id,
+                        'name': card.template.name,
+                        'element': card.template.element,
+                    },
+                    'health': card.health,
+                    'attack': card.attack,
+                    'defense': card.defense,
+                })
+
+            response_data = {
+                'user': {
+                    'id': user.id,
+                    'telegram_id': user.telegram_id,
+                    'username': user.username,
+                    'first_name': user.first_name or '',
+                    'last_name': user.last_name or '',
+                    'total_games': user.total_games,
+                    'games_won': user.games_won,
+                    'total_points': user.total_points,
+                    'current_streak': user.current_streak,
+                    'best_streak': user.best_streak,
+                    'coins': user.coins,
+                    'gems': user.gems,
+                    'win_rate': user.win_rate,
+                },
+                'cards': [{
+                    'id': card.id,
+                    'template': {
+                        'id': card.template.id,
+                        'name': card.template.name,
+                        'element': card.template.element,
+                    },
+                    'health': card.health,
+                    'attack': card.attack,
+                    'defense': card.defense,
+                    'acquired_at': card.acquired_at.isoformat(),
+                } for card in cards],
+                'deck': {
+                    'id': deck.id,
+                    'name': deck.name,
+                    'cards': deck_cards_data,
+                },
+            }
+
+            print(f"DEBUG: Response data prepared successfully")
+            print(f"DEBUG: Final response structure check...")
+            print(f"DEBUG: User data: {response_data['user']['username']}")
+            print(f"DEBUG: Cards count: {len(response_data['cards'])}")
+            print(f"DEBUG: Deck cards count: {len(response_data['deck']['cards'])}")
+            return Response(response_data)
+
+        except Exception as e:
+            print(f"DEBUG: ERROR in get_user_profile: {str(e)}")
+            import traceback
+            print(f"DEBUG: Traceback: {traceback.format_exc()}")
             return Response(
-                {'error': 'Необходим telegram_id или аутентификация'},
-                status=status.HTTP_401_UNAUTHORIZED
+                {'error': f'Internal server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-        # Получаем карты пользователя
-        cards = CardInstance.objects.filter(owner=user)
-        print(f"DEBUG: Found {cards.count()} cards for user")
-
-        # Получить или создать колоду
-        deck, created = Deck.objects.get_or_create(owner=user)
-        print(f"DEBUG: Deck {'created' if created else 'found'}: {deck.name}")
-
-        # Получаем карты колоды с деталями
-        deck_cards_data = []
-        for deck_card in deck.deck_cards.select_related('card__template').all():
-            card = deck_card.card
-            deck_cards_data.append({
-                'id': card.id,
-                'position': deck_card.position,
-                'template': {
-                    'id': card.template.id,
-                    'name': card.template.name,
-                    'element': card.template.element,
-                },
-                'health': card.health,
-                'attack': card.attack,
-                'defense': card.defense,
-            })
-
-        response_data = {
-            'user': {
-                'id': user.id,
-                'telegram_id': user.telegram_id,
-                'username': user.username,
-                'first_name': user.first_name or '',
-                'last_name': user.last_name or '',
-                'total_games': user.total_games,
-                'games_won': user.games_won,
-                'total_points': user.total_points,
-                'current_streak': user.current_streak,
-                'best_streak': user.best_streak,
-                'coins': user.coins,
-                'gems': user.gems,
-                'win_rate': user.win_rate,
-            },
-            'cards': [{
-                'id': card.id,
-                'template': {
-                    'id': card.template.id,
-                    'name': card.template.name,
-                    'element': card.template.element,
-                },
-                'health': card.health,
-                'attack': card.attack,
-                'defense': card.defense,
-                'acquired_at': card.acquired_at.isoformat(),
-            } for card in cards],
-            'deck': {
-                'id': deck.id,
-                'name': deck.name,
-                'cards': deck_cards_data,
-            },
-        }
-
-        print(f"DEBUG: Response data prepared successfully")
-        return Response(response_data)
 
 
 class DeckViewSet(viewsets.ViewSet):

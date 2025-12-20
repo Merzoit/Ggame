@@ -260,16 +260,16 @@ class CardInstanceViewSet(viewsets.ModelViewSet):
                 },
             }
 
-        print(f"DEBUG: Response data prepared successfully")
-        print(f"DEBUG: Final response structure check...")
-        print(f"DEBUG: User data: {response_data['user']['username']}")
-        print(f"DEBUG: Cards count: {len(response_data['cards'])}")
-        print(f"DEBUG: Deck cards count: {len(response_data['deck']['cards'])}")
-        print(f"DEBUG: About to return Response with status 200")
+            print(f"DEBUG: Response data prepared successfully")
+            print(f"DEBUG: Final response structure check...")
+            print(f"DEBUG: User data: {response_data['user']['username']}")
+            print(f"DEBUG: Cards count: {len(response_data['cards'])}")
+            print(f"DEBUG: Deck cards count: {len(response_data['deck']['cards'])}")
+            print(f"DEBUG: About to return Response with status 200")
 
-        response = Response(response_data, status=status.HTTP_200_OK)
-        print(f"DEBUG: Response created: {response.status_code}")
-        return response
+            response = Response(response_data, status=status.HTTP_200_OK)
+            print(f"DEBUG: Response created: {response.status_code}")
+            return response
 
         except Exception as e:
             print(f"=== DEBUG: CRITICAL ERROR in get_user_profile ===")
